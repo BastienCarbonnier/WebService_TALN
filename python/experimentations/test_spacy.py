@@ -8,6 +8,8 @@ doc = nlp("La proprete laise à désirer.")
 
 displacy.serve(doc, style='ent')
 print([(word.text, word.dep_) for word in doc])
+
+
 # fr_core_news_md
 #25s 22 mots
 #22,75s 14 mots
