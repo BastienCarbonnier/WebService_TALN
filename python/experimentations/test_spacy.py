@@ -3,11 +3,31 @@ import spacy
 from spacy import displacy
 #_md _sm
 nlp = spacy.load("fr_core_news_sm")
-doc = nlp("La proprete laise à désirer.")
+doc = nlp("La chambre était très sale.")
 
 
-displacy.serve(doc, style='ent')
-print([(word.text, word.dep_) for word in doc])
+'''
+for token in doc:
+    if not token.is_punct:
+        print("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}".format(
+            token.text,
+            token.idx,
+            token.lemma_,
+            token.is_punct,
+            token.is_space,
+            token.shape_,
+            token.pos_,
+            token.tag_
+        ))
+'''
+
+for token in doc:
+    if not token.is_punct and token.pos_!="ADP" and token.pos_!="DET":
+        print("{0}\t{1}".format(
+            token.text,
+            token.pos_
+        ))
+#print([(word.text, word) for word in doc])
 
 
 # fr_core_news_md
