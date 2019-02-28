@@ -27,14 +27,6 @@ app.get('/', (req, res) => {
 
         let phrase = JSON.parse(JSON.stringify(results[0]));
 
-        /*
-        for (let i in phrase) {
-            if (phrase[i].type == "punct" || phrase[i].type == "det") {
-                phrase.splice(i,i);
-            }
-        }
-        */
-
         temp = [];
 
         for(let i of phrase)
@@ -64,12 +56,7 @@ function getPolaritePhrase(phrase,callback){
     let phrase_pol = [];
     async.forEachOf(phrase, (value, key, callbackFor) => {
         let mot_pol = {};
-        mot_pol.index = value.index;
-        mot_pol.mot = value.mot;
-        mot_pol.type = value.type;
-        if (mot_pol.type == "NOUN"){
-            mot_pol.index_adj=value.index_adj;
-        }
+        mot_pol = value;
 
         if (mot_pol.type!="ADP" && mot_pol.type!="DET"){
             getPolariteMot(value.mot,function(pol){
@@ -113,76 +100,83 @@ function filter_array(array) {
 function propagerPolarite (tokens,callback){
 
     let phrase_pol = [];
-    console.log(tokens);
+
     async.forEachOf(tokens, (value, key, callbackFor) => {
         let current = {};
-        current.index = value.index;
-        current.mot = value.mot;
-        current.type = value.type;
-        current.pol = value.pol;
-        if (current.type == "NOUN"){
-            current.index_adj=value.index_adj;
-        }
 
-        let id_courant = current.index;
-        let next_token = (current.index== tokens.length-1)?null:tokens[current.index+1];
-        let prev_token = (current.index== 0)?null:tokens[current.index-1];
-        if (current.type!="ADP" && current.type!="DET"){
-            if(current.type=="ADJ"){
-                if(next_token && next_token.type=="ADV"){
-                    if (next_token.pol<0 && current.pol <=0){
-                        current.pol--;
-                    }
-                    else if (next_token.pol>0 && current.pol >=0) {
-                        current.pol++;
-                    }
-                    else if (next_token.pol>0 && current.pol<0){
-                        current.pol--;
-                    }
-                }
-                if(prev_token && prev_token.type=="ADV"){
-                    if (prev_token.pol<0 && current.pol <=0){
-                        current.pol--;
-                    }
-                    else if (prev_token.pol>0 && current.pol >=0){
-                        current.pol++;
-                    }
-                    else if (prev_token.pol>0 && current.pol<0){
-                        current.pol--;
-                    }
-                }
-            }
+        current = value;
+        if (current.type == "ADJ") {
 
-            phrase_pol[current.index]=current;
-            callbackFor();
+            async.forEachOf(current.index_adv,(value, key, callbackFor2) => {
+                let token = tokens[value];
+
+                if (token.pol<0 && current.pol <=0){
+                    current.pol--;
+                }
+                else if (token.pol>0 && current.pol >=0) {
+                    current.pol++;
+                }
+                else if (token.pol>0 && current.pol<0){
+                    current.pol--;
+                }
+                callbackFor2();
+
+            }, err => {
+                if (err) console.error(err.message);
+                phrase_pol[current.index]=current;
+                callbackFor();
+            });
         }
         else{
             phrase_pol[current.index]=current;
             callbackFor();
         }
+
+
+
+
     }, err => {
         if (err) console.error(err.message);
 
         async.forEachOf(phrase_pol, (value, key, callbackFor2) => {
+            let current = {};
 
-                if (value.type=="NOUN"){
-                    let sum_pol = 0;
-                    for (let i in value.index_adj){
-                        sum_pol+=phrase_pol[value.index_adj[i]].pol;
+            current = value;
+            if (current.type=="NOUN"){
+                let sum_pol=0;
+
+                async.forEachOf(current.index_adj,(value, key, callbackFor3) => {
+                    console.log("-------- phrase_pol[value]");
+                    console.log(phrase_pol[value]);
+                    sum_pol += phrase_pol[value].pol;
+                    console.log(sum_pol);
+                    callbackFor3();
+                }, err => {
+                    if (err) console.error(err.message);
+
+                    console.log("-------- sum_pol");
+                    console.log(sum_pol);
+
+                    if (sum_pol<0 && current.pol <=0){
+                        current.pol--;
                     }
-                    let mean = sum_pol/value.index_adj.length;
-                    if(mean>0 && value.pol>=0)
-                        value.pol++;
-                    else if(mean<0 && value.pol<=0)
-                        value.pol--;
-                    else if(mean<0 && value.pol>=0)
-                        value.pol--;
-                    else if(mean>0 && value.pol0)
-                        value.pol--;
+                    else if (sum_pol>0 && current.pol >=0) {
+                        current.pol++;
+                    }
+                    else if (sum_pol>0 && current.pol<0){
+                        current.pol--;
+                    }
 
-                }
-                phrase_pol[value.index]=value;
+                    phrase_pol[current.index]=current;
+                    callbackFor2();
+                });
+                //let mean = sum_pol/current.index_adj.length;
+            }
+            else{
+                phrase_pol[current.index]=current;
                 callbackFor2();
+            }
+
 
         }, err => {
             if (err) console.error(err.message);
@@ -236,7 +230,7 @@ function getPolariteMot (mot,callback){
             }
             else{
                 //console.log("Error : result regex null");
-                //callback(-1);
+                callback(-1);
             }
 
         }
