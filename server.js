@@ -58,7 +58,7 @@ function getPolaritePhrase(phrase,callback){
         let mot_pol = {};
         mot_pol = value;
 
-        if (mot_pol.type!="ADP" && mot_pol.type!="DET"){
+        if (mot_pol.nature!="ADP" && mot_pol.nature!="DET"){
             getPolariteMot(value.mot,function(pol){
                 mot_pol.pol = pol;
                 phrase_pol[value.index]=mot_pol;
@@ -105,7 +105,7 @@ function propagerPolarite (tokens,callback){
         let current = {};
 
         current = value;
-        if (current.type == "ADJ") {
+        if (current.nature == "ADJ") {
 
             async.forEachOf(current.index_adv,(value, key, callbackFor2) => {
                 let token = tokens[value];
@@ -142,7 +142,7 @@ function propagerPolarite (tokens,callback){
             let current = {};
 
             current = value;
-            if (current.type=="NOUN"){
+            if (current.nature=="NOUN"){
                 let sum_pol=0;
 
                 async.forEachOf(current.index_adj,(value, key, callbackFor3) => {
@@ -187,6 +187,48 @@ function propagerPolarite (tokens,callback){
 
 
 }
+
+/*
+Polarité vecteur de trois valeur
+
+gestion petit en dur
+
+20 % neg 20% neutre 60% positif
+propagé un vecteur
+
+le bateau à voile
+
+le bateau = tête
+
+tête prend un poids plus important que le reste et on propage
+
+corenlp
+treetager
+
+google nlp
+
+Mots composé
+structure arbre préfixe sérialisé
+
+lemmatiser que le verbe
+
+
+Structure sous forme d'arbre
+tête de la phrase groupe verbale
+
+groupe nominal
+
+
+A faire :
+
+Mots composé : supprimer mots (majuscule)
+Regarder analyseur
+
+remplacer type par nature
+
+
+
+ */
 
 function getPolariteMot (mot,callback){
 
