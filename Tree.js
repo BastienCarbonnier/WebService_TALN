@@ -1,15 +1,20 @@
 /*jslint node: true */
 /*jshint esversion: 6 */
 /* jshint expr: true */
-
-function Node(data) {
-    this.data = data;
+var async       = require("async");
+function Node(text) {
+    this.text = text;
     this.parent = null;
     this.children = [];
 }
+function Node(text,parent) {
+    this.text = text;
+    this.parent = parent;
+    this.children = [];
+}
 
-function Tree(data) {
-    var node = new Node(data);
+function Tree(text) {
+    var node = new Node(text);
     this._root = node;
 }
 
@@ -32,15 +37,15 @@ Tree.prototype.traverseDF = function(callback) {
 };
 
 function Queue() {
-  this.data = [];
+  this.text = [];
 }
 
 Queue.prototype.enqueue = function(record) {
-    this.data.unshift(record);
+    this.text.unshift(record);
 };
 Queue.prototype.dequeue = function() {
-    let last = this.data[this.data.length - 1];
-    this.data.pop();
+    let last = this.text[this.text.length - 1];
+    this.text.pop();
     return last;
 
 };
@@ -50,7 +55,6 @@ Tree.prototype.traverseBF = function(callback) {
     queue.enqueue(this._root);
 
     currentTree = queue.dequeue();
-
     while(currentTree){
         for (var i = 0, length = currentTree.children.length; i < length; i++) {
             queue.enqueue(currentTree.children[i]);
@@ -63,11 +67,12 @@ Tree.prototype.traverseBF = function(callback) {
 Tree.prototype.contains = function(callback, traversal) {
     traversal.call(this, callback);
 };
-Tree.prototype.add = function(data, toData, traversal) {
-    var child = new Node(data),
+
+Tree.prototype.add = function(text, totext, traversal) {
+    var child = new Node(text),
         parent = null,
         callback = function(node) {
-            if (node.data === toData) {
+            if (node.text === totext) {
                 parent = node;
             }
         };
@@ -82,14 +87,44 @@ Tree.prototype.add = function(data, toData, traversal) {
     }
 };
 
-Tree.prototype.remove = function(data, fromData, traversal) {
+Tree.prototype.addWord = function(word,callback) {
+    let currentNode = this._root;
+    // Boucle sur chaque enfant du parent passé en paramètre
+    async.forEachOf(word, (letter, key, callbackFor) => {
+        let indexNode = -1;
+        async.forEachOf(currentNode.children, (value, key, callbackFor2) => {
+            if (value.text == letter)
+                indexNode = key;
+            callbackFor2(false);
+        }, err => {
+            if (err) console.error(err.message);
+            if(indexNode == -1){
+                let newNode = new Node(letter,currentNode);
+                currentNode.children.push(newNode);
+                currentNode = newNode;
+                callbackFor(false);
+            }
+            else{
+                currentNode = currentNode.children[indexNode];
+                callbackFor(false);
+            }
+        });
+
+
+    }, err => {
+        if (err) console.error(err.message);
+        callback();
+    });
+};
+
+Tree.prototype.remove = function(text, fromtext, traversal) {
     var tree = this,
         parent = null,
         childToRemove = null,
         index;
 
     var callback = function(node) {
-        if (node.data === fromData) {
+        if (node.text === fromtext) {
             parent = node;
         }
     };
@@ -97,7 +132,7 @@ Tree.prototype.remove = function(data, fromData, traversal) {
     this.contains(callback, traversal);
 
     if (parent) {
-        index = findIndex(parent.children, data);
+        index = findIndex(parent.children, text);
 
         if (index === undefined) {
             throw new Error('Node to remove does not exist.');

@@ -10,7 +10,7 @@ var async       = require("async"),
     Node        = require('./Tree');
 
 let {PythonShell} = require('python-shell');
-function parserPhrase(phrase,callback){
+function parserPhrase(phrase,mc_tree,callback){
     var options = {
         mode: 'json',
         scriptPath: '/Users/bca/Workspace/TER_M1_Hotel_Advisor/WebService_TALN/python/',

@@ -5,30 +5,32 @@
 var express     = require('express'),
     async       = require("async"),
     polarisation = require('./polarisation'),
-    parseur     = require('./parseur');
+    parseur     = require('./parseur'),
+    tools       = require('./tools');
 
 const app = express();
 const port = 3000;
 
 app.get('/', (req, res) => {
-
-   parseur.parserPhrase(req.query.phrase, (tab_phrase)=>{
-       polarisation.getPolaritePhrase(tab_phrase, (tab_phrase_polarise)=>{
-           res.json(tab_phrase_polarise);
-       });
-   });
+    let mc_tree;
+    parseur.parserPhrase(req.query.phrase,mc_tree, (tab_phrase)=>{
+        polarisation.getPolaritePhrase(tab_phrase, (tab_phrase_polarise)=>{
+            res.json(tab_phrase_polarise);
+        });
+    });
 
 
 });
 
-app.listen(port, (err) => {
-    if (err) {
-        return console.log('something bad happened', err);
-    }
+tools.initialisation(()=>{
+    app.listen(port, (err) => {
+        if (err) {
+            return console.log('something bad happened', err);
+        }
 
-    console.log(`server is listening on ${port}`);
+        console.log(`server is listening on ${port}`);
+    });
 });
-
 
 
 /*
