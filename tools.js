@@ -16,6 +16,9 @@ function initialisation (callback){
         if (err) throw err;
         let mc_tab = mc.split("\n");
         creationArbrePrefixe(mc_tab, (mc_tree)=>{
+            mc_tree.containsCompoundWord("tache de rousseur", (response)=>{
+                console.log(response);
+            });
             callback(mc_tree);
         });
     });
@@ -23,20 +26,21 @@ function initialisation (callback){
 }
 
 function creationArbrePrefixe(mc_tab,callback){
-    console.log("Creation de l'arbre des préfixe");
+    console.log("####### Creation de l'arbre des préfixes #######");
 
     let mc_tree = new Tree("");
+
+    mc_tab = mc_tab.slice(0,21);
     /*
-    mc_tab = mc_tab.slice(0,2);
     for (let i in mc_tab){
         console.log(mc_tab[i]);
     }
     */
+
     // Boucle sur chaque mot composés
     async.forEachOf(mc_tab, (value, key, callbackFor) => {
 
         let mot = value.split(";")[1];
-        // Boucle sur chaque lettre
         mc_tree.addWord(mot, (err) => {
             if(err) console.log(err);
             //console.log("mot ajouté");
@@ -46,6 +50,11 @@ function creationArbrePrefixe(mc_tab,callback){
     }, err => {
         if (err) console.error(err.message);
         console.log("Arbre crée");
+        /*
+        mc_tree.traverseDF((node) => {
+            console.log(node);
+        });
+        */
         callback(mc_tree);
     });
 }
