@@ -26,24 +26,10 @@ function parserPhrase(phrase,mc_tree,callback){
         console.log(tab_phrase);
 
         // ReVerifier mots composés et recupérer les natures correspondantes
+
         callback(tab_phrase);
 
     });
 }
-
-/*
-
-var tree = new Tree('CEO');
-
-tree.add('VP of Happiness', 'CEO', tree.traverseBF);
-tree.add('VP of Finance', 'CEO', tree.traverseBF);
-tree.add('VP of Sadness', 'CEO', tree.traverseBF);
-
-tree.add('Director of Puppies', 'VP of Finance', tree.traverseBF);
-tree.add('Manager of Puppies', 'Director of Puppies', tree.traverseBF);
-tree.traverseDF(function(node) {
-console.log(node.data);
-});
-*/
 
 module.exports.parserPhrase = parserPhrase;

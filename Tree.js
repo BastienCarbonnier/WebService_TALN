@@ -189,8 +189,10 @@ Tree.prototype.containsCompoundWord = function(compound_word,callback) {
         function (err,findWord) { //final result
             if(findWord){
                 console.log("Mot composé trouvé");
+                callback(err,findWord);
             }else{
                 console.log("Mot composé non trouvé");
+                callback(err,findWord);
             }
         }
     );
