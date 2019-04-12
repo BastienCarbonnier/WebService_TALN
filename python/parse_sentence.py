@@ -39,7 +39,6 @@ def findAdjectifForNouns(phrase,i_nom):
             break
     return index_adj
 
-
 def findAdverbsForAdjectifs(phrase,i_adj):
     index_adv = []
     i_d = i_adj+1
@@ -60,6 +59,64 @@ def findAdverbsForAdjectifs(phrase,i_adj):
             break
     return index_adv
 
+# "Dans l'ensemble le séjour a été agréable et nous recommandons l'hôtel."
+# pour les verbes juste à proximité
+def findVerbeForNouns(phrase,i_nom):
+    index_verbe = []
+    i_d = i_nom+1
+    i_g = i_nom-1
+    deja_trouve = False
+
+    while i_d <len(phrase):
+        if phrase[i_d]["nature"]=="VERB":
+            index_verbe.append(i_d)
+            deja_trouve = True
+            i_d+=1
+        elif phrase[i_d]["nature"]=="DET":
+            i_d+=1
+        elif phrase[i_d]["nature"]=="ADV":
+            i_d+=1
+        else:
+            break
+
+
+    deja_trouve = False
+    while i_g >=0:
+        if phrase[i_g]["nature"]=="VERB":
+            index_verbe.append(i_g)
+            deja_trouve = True
+            i_g-=1
+        elif phrase[i_g]["nature"]=="DET":
+            i_g-=1
+        elif phrase[i_g]["nature"]=="ADV":
+            i_g-=1
+        else:
+            break
+    return index_verbe
+
+# prise en compte de la négation ou autre
+def findAdverbsForVerbes(phrase,i_adj):
+    index_adv = []
+    i_d = i_adj+1
+    i_g = i_adj-1
+
+    while i_d <len(phrase):
+        if phrase[i_d]["nature"]=="ADV":
+            index_adv.append(i_d)
+            i_d+=1
+        else:
+            break
+
+    while i_g >=0:
+        if phrase[i_g]["nature"]=="ADV":
+            index_adv.append(i_g)
+            i_g-=1
+        else:
+            break
+    return index_adv
+
+
+
 
 nlp = spacy.load("fr_core_news_sm")
 doc = nlp(sys.argv[1])
@@ -77,11 +134,18 @@ for index,item in enumerate(list):
     if item["nature"] == "NOUN":
         item["index_adj"] = []
         item["index_adj"] = findAdjectifForNouns(list,index)
+        item["index_verb"] = []
+        item["index_verb"] = findVerbeForNouns(list,index)
         list[index] = item
     elif item["nature"] == "ADJ":
         item["index_adv"] = []
         item["index_adv"] = findAdverbsForAdjectifs(list,index)
         list[index] = item
+    elif item["nature"] == "VERB":
+        item["index_adv"] = []
+        item["index_adv"] = findAdverbsForVerbes(list,index)
+        list[index] = item
+
 
 # Tests :
 # "La grande chambre vraiment noire était sale et la petite chambre était très très moche"
