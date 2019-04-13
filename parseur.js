@@ -18,8 +18,8 @@ function parserPhrase(phrase,mc_tree,callback){
     };
 
     options.args[0] = phrase;
-    // Verifier mots composés
-    PythonShell.run('parse_sentence.py', options, function (err, results) {
+    // On récupère les pos_tag de chaque mot.
+    PythonShell.run('get_pos_tag.py', options, function (err, results) {
         if (err) throw err;
 
         let tab_phrase = JSON.parse(JSON.stringify(results[0]));
@@ -44,7 +44,7 @@ function parserPhrase(phrase,mc_tree,callback){
             Gérer les relative : que qui
             subordonné avec que
 
-            la nourriture de cet hôtel qeu j'aime bien est déguelasse
+            la nourriture de cet hôtel que j'aime bien est déguelasse
 
             groupe nominaux prépositionnel
 

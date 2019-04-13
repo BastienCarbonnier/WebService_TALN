@@ -5,7 +5,7 @@ import nltk.data
 from nltk.corpus import stopwords
 from nltk.tokenize import PunktSentenceTokenizer
 
-sentence = "La propreté laisse à désirer."
+sentence = "La salle de bain était très salle."
 tokens = nltk.word_tokenize(sentence)
 #st = nltk.sent_tokenize(sentence,'french')
 
