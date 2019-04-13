@@ -40,8 +40,6 @@ function makeGetRequestRezoDump (word,rel_id,param,callback){
 
         var result = $('code').text();
         callback(null,result);
-
-
     })
     .catch((err) => {
         console.log(err);

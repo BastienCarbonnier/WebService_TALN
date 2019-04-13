@@ -6,13 +6,15 @@ var async       = require("async"),
     rp          = require('request-promise'),
     cheerio     = require('cheerio'),
     windows1252 = require('windows-1252'),
-    rezo        = require('./request_rezo');
+    rezo        = require('./request_rezo'),
+    cache       = require('./cache/gestion_cache');
 
 function getPolaritePhrase(phrase,callback){
     let phrase_pol = [];
     async.forEachOf(phrase, (value, key, callbackFor) => {
         let mot_pol = {};
         mot_pol = value;
+
 
         if (mot_pol.nature!="ADP" && mot_pol.nature!="DET"){
             getPolariteMot(value.mot,function(pol){
@@ -87,10 +89,6 @@ function propagerPolarite (tokens,callback){
             phrase_pol[current.index]=current;
             callbackFor();
         }
-
-
-
-
     }, err => {
         if (err) console.error(err.message);
 
@@ -144,6 +142,87 @@ function propagerPolarite (tokens,callback){
 
 }
 
+function sum_vector(pol1,pol2){
+    sum_pol = {};
+    return {neg : pol1.neg+pol2.neg, neutre:pol1.neutre+pol2.neutre,pos:pol1.pos+pol2.pos};
+}
+
+
+function getVecteurPolariteMot (mot,callback){
+    mot = "propreté";
+    cache.getFromCache(mot, (find,data)=>{
+        if (find){
+            let vecteur = {};
+            vecteur.pos = data.pol_pos;
+            vecteur.neutre = data.pol_neutre;
+            vecteur.neg = data.pol_neg;
+            callback(vecteur);
+        }
+        else{
+            getFromRezoDump(mot,(err,vect)=>{
+                if(err==-1) console.log("Erreur lors de la reqûete");
+                else callback(vect);
+            });
+        }
+
+    });
+}
+
+function getFromRezoDump(mot,callback){
+    let code_pol = {
+        pos : 223173,
+        neutre : 241794,
+        neg : 223172
+    };
+    rezo.makeGetRequestRezoDump(mot,36,"&relin=norelin",function(err, result){
+        if (!err){
+            var regex_rs = new RegExp("r;\\d*;\\d*;\\d*;\\d*;(-|)\\d*","g");
+            var res = result.match(regex_rs);
+            if (res != null){
+                let vecteur = {};
+                let tab_res;
+                async.forEachOf(res, (value, key, callbackFor) => {
+                    tab_res = value.split(";");
+                    let pos_id = Number(tab_res[3]);
+                    let poids=Number(tab_res[5]);
+
+                    if (pos_id ===code_pol.neg)
+                        vecteur.neg = poids;
+                    if (pos_id===code_pol.pos) {
+                        vecteur.pos = poids;
+                    }
+                    if (pos_id===code_pol.neutre) {
+                        vecteur.neutre = poids;
+                    }
+                    callbackFor();
+                }, resultat => {
+                    vecteur.pos= (vecteur.pos==undefined)?0:vecteur.pos;
+                    vecteur.neutre =(vecteur.neutre==undefined)?0:vecteur.neutre;
+                    vecteur.neg =(vecteur.neg==undefined)?0:vecteur.neg;
+                    let data = {
+                        id : Number(tab_res[2]),
+                        mot : mot,
+                        pos_tag : "",
+                        pol_pos : vecteur.pos,
+                        pol_neutre : vecteur.neutre,
+                        pol_neg : vecteur.neg,
+                    };
+                    cache.addToCache(data, ()=>{
+                        callback(null,vecteur);
+                    });
+                });
+            }
+            else{
+                callback(-1);
+            }
+        }
+        else {
+            callback(-1);
+            console.log("Error : result request");
+        }
+
+    });
+}
 function getPolariteMot (mot,callback){
 
     rezo.makeGetRequestRezoDump(mot,36,"&relin=norelin",function(err, result){
@@ -154,6 +233,7 @@ function getPolariteMot (mot,callback){
 
             if (rs != null){
                 //console.log(rs);
+
                 rezo.findMaxPoidsRelSortante(rs ,function(pol_id) {
                     var regex = new RegExp("e;"+pol_id+";'.*';\\d*;\\d*","g");
 
@@ -202,3 +282,4 @@ function getPolariteMot (mot,callback){
 }
 
 module.exports.getPolaritePhrase = getPolaritePhrase;
+module.exports.getVecteurPolariteMot =getVecteurPolariteMot;

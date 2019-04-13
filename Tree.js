@@ -104,7 +104,6 @@ Tree.prototype.addWord = function(compound_word,callback) {
         }, err => {
             if (err) console.error(err.message);
             if(indexNode == -1){
-
                 let newNode = new Node(word,currentNode, (key==compound_word_tab.length-1));
                 currentNode.children.push(newNode);
                 currentNode = newNode;
@@ -123,76 +122,149 @@ Tree.prototype.addWord = function(compound_word,callback) {
     });
 };
 
+
 Tree.prototype.containsCompoundWord = function(compound_word,callback) {
 
     let words = compound_word.split(" ");
+    let nbr_mot_init = words.length;
 
-    // On prend et on supprime le premier mot de words
-    let currentWord = words[0];
-    words = words.slice(1);
+    let root = this._root;
+    let currentTree = root;
+    let endCW  = false;
 
-    let currentTree = this._root;
-    endCW  = false;
-    let nbr_children = currentTree.children.length;
     let i = 0;
-    let cpt = 0;
+    let n = 0;
+
     let find = false;
     let childrens = currentTree.children;
+    let nbr_children = childrens.length;
 
-    async.whilst( // Tant que nous n'arivons pas à la fin du mots composé ou si il n'est pas dans l'arbre
+    let max_cw = []; // Les mots composés les plus grands pour chaque index
+    for (let p =0;p<words.length;p++)
+        max_cw[p]=0;
+
+    let size = 0; // Taille du mot composé
+
+
+    // On prend et on supprime le premier mot de words
+
+    let currentWord = words[0];
+    let words_save;
+    //words = words.slice(1);
+
+
+
+    let findCW = false;
+    async.whilst( // Tant que nous n'arrivons pas à la fin de la phrase
         function () { return  currentTree && !endCW; },//check condition.
         function (callback1) {
             find = false;
-            async.whilst( // Pour chaque enfant àmoins que nous trouvons le mot
+            async.whilst( // Pour chaque enfant à moins que nous trouvions le mot
                 function () { return  !find && i < nbr_children; },//check condition.
                 function (callback2) {
                     if(childrens[i].text == currentWord){
+                        //console.log("Fils trouvé : " + childrens[i].text+" "+currentWord);
                         find = true;
                         callback2(null,true);
                     }
                     else{
+                        //console.log("Fils non trouvé : " + childrens[i].text+" "+currentWord);
                         i++;
                         find=false;
                         callback2(null,false);
                     }
                 },
-                function (err,findWord) { //final result
-                    if(findWord){
-                        if (words.length==0){
+                function (err,findSon) {
+                    if(findSon){
+                        size++;
+
+                        if (words.length==0){ // On est à la fin de la phrase
                             endCW = true;
                             if (childrens[i].isLeaf){
-                                callback1(null,true); // Mots composés présent dans l'arbre
+                                // On enregistre le mot composé
+                                max_cw[nbr_mot_init-words.length-size+1]= size;
+                                //console.log(max_cw);
+                                size=0;
+                                findCW = true;
+                                callback1(null,findCW,max_cw); // Mots composés présent dans l'arbre
                             }
                             else {
-                                callback1(null,false); // Mots composés non présent dans l'arbre
+                                callback1(null,findCW,max_cw); // Mots composés non présent dans l'arbre
                             }
                         }
                         else{
+                            // Si ce n'est pas la fin et que c'est une feuille
+                            if (childrens[i].isLeaf){
+                                findCW = true;
+                                // On enregistre le mot composé
+                                max_cw[nbr_mot_init-words.length-size+1]= size;
+
+                                if (words_save==undefined){
+                                    words_save = words.slice();
+                                    words = words.slice(1);
+                                    currentWord = words[0];
+                                }
+                                else{
+                                    words = words_save.slice(1);
+                                    currentWord = words[0];
+                                    words_save = undefined;
+                                }
+
+
+                            }
+                            else{
+                                if (words_save == undefined){
+                                    words_save = words.slice();
+                                }
+                                words = words.slice(1);
+                                currentWord = words[0];
+                            }
                             endCW = false;
-                            currentWord = words[0];
-                            words = words.slice(1);
                             currentTree = childrens[i];
-                            childrens = childrens[i].children;
+                            childrens = currentTree.children;
                             i=0;
                             nbr_children = childrens.length;
-                            callback1(null,null);
+                            callback1(null,findCW,max_cw);
                         }
                     }
                     else{
-                        endCW = true;
-                        callback1(null,false);
+                        if (words.length==0){
+                            endCW = true;
+                            callback1(null,findCW,max_cw);
+                        }
+                        else{
+
+                            endCW =false;
+                            if (words_save != undefined){
+                                words = words_save.slice(1);
+                                words_save = undefined;
+                                currentWord = words[0];
+                            }
+                            else{
+                                words = words.slice(1);
+                                currentWord = words[0];
+                            }
+
+                            size=0;
+                            currentTree = root;
+                            childrens = currentTree.children;
+                            i=0;
+                            nbr_children = childrens.length;
+                            callback1(null,findCW,max_cw);
+                        }
+
                     }
                 }
             );
 
         },
-        function (err,findWord) { //final result
+        function (err,findWord,max_cw) { //final result
             if(findWord){
-                console.log("Mot composé trouvé");
-                callback(err,findWord);
+                console.log("On a trouvé au moins 1 mot composé");
+                callback(err,findWord,max_cw);
             }else{
-                console.log("Mot composé non trouvé");
-                callback(err,findWord);
+                console.log("Aucun mot composé n'a été trouvé");
+                callback(err,findWord,max_cw);
             }
         }
     );
