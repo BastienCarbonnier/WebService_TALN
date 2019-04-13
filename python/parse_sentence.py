@@ -20,6 +20,8 @@ def findAdjectifForNouns(phrase,i_nom):
             i_d+=1
         elif phrase[i_d]["nature"]=="AUX":
             i_d+=1
+        elif phrase[i_d]["nature"]=="CCONJ": # pour la conjonction et ex : "Globalement très bon hôtel et personnel très accueillant et actif." prendre en compte "accueillant" et (CCONJ) "actif"
+            i_d+=1
         else:
             break
 
@@ -34,6 +36,8 @@ def findAdjectifForNouns(phrase,i_nom):
         elif phrase[i_g]["nature"]=="ADV":
             i_g-=1
         elif phrase[i_g]["nature"]=="AUX":
+            i_g-=1
+        elif phrase[i_g]["nature"]=="CCONJ":
             i_g-=1
         else:
             break
