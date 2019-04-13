@@ -6,6 +6,7 @@ var async       = require("async"),
     rp          = require('request-promise'),
     cheerio     = require('cheerio'),
     windows1252 = require('windows-1252'),
+    rezo        = require('./request_rezo'),
     Tree        = require('./Tree'),
     Node        = require('./Tree');
 
@@ -17,63 +18,101 @@ function parserPhrase(phrase,mc_tree,callback){
         args: []
     };
 
-    options.args[0] = phrase;
-    // On récupère les pos_tag de chaque mot.
+    options.args[0] = "la salle de bain était très sale";//phrase;
+    // On récupère les pos_tag de chaque mots
     PythonShell.run('get_pos_tag.py', options, function (err, results) {
         if (err) throw err;
 
         let tab_phrase = JSON.parse(JSON.stringify(results[0]));
         console.log(tab_phrase);
-        let phrase_struc = "";
-        // ReVerifier mots composés et recupérer les natures correspondantes
-        async.forEachOf(tab_phrase, (value, key, callbackFor) => {
 
-            phrase_struc += value.mot+ " ";
+        // On vérifie si la phrase contient des mots composés
+        mc_tree.containsCompoundWord(tab_phrase, (err,exist,max_cw)=>{
+            console.log(max_cw);
+            // On join les mots composés et on adapte les index en conséquence
+            joinCompoundWords (tab_phrase,max_cw,(tab_phrase_cw)=>{
+                options.args[0] = JSON.stringify(tab_phrase_cw);
+                // On propage les pos tag par proximité
+                PythonShell.run('propage_pos_tag.py', options, function (err, results) {
+                    if (err) throw err;
 
-            callbackFor();
+                    let phrase_pos_prop = JSON.parse(JSON.stringify(results[0]));
+                    console.log(phrase_pos_prop);
+                    callback(phrase_pos_prop);
 
-        }, err => {
-            if (err) console.error(err.message);
-            phrase_struc = phrase_struc.substr(0,phrase_struc.length-1);
-
-            mc_tree.containsCompoundWord(phrase_struc, (err,exist,max_cw)=>{
-                console.log(max_cw);
+                });
             });
 
-            /*
-            Gérer les relative : que qui
-            subordonné avec que
-
-            la nourriture de cet hôtel que j'aime bien est déguelasse
-
-            groupe nominaux prépositionnel
-
-            négation en priorité également
-
-            voir ce qui est urgent dans les avis
-
-
-            suivi taln mettre les heuristiques
-            définir une mesure sur 100 avis par exemple
-
-            pattern devoir : devoir faire un effort
-
-            la qualité de la nourriture est remarquable
-
-            qualité du services
-
-
-            satisfait appareil
-
-
-            injecteur des regex
-             */
-            callback();
         });
-
-        callback(tab_phrase);
 
     });
 }
+
+function joinCompoundWords (phrase,cw_index,callback){
+    let decalage = 0;
+    async.forEachOf(cw_index, (size_cw, index_cw, callbackFor) => {
+        if (size_cw == 0){
+            if(index_cw<phrase.length)
+                phrase[index_cw].index = phrase[index_cw].index -decalage;
+            callbackFor();
+        }
+        else{
+            let words_joined = phrase[index_cw-decalage];
+
+            let word_to_join = phrase.slice(index_cw+1-decalage,index_cw+size_cw-decalage);
+
+            async.forEachOf(word_to_join, (word, key, callbackFor1) => {
+                words_joined.mot += " " + word.mot;
+                callbackFor1();
+            }, err => {
+                if (err) console.error(err.message);
+
+                phrase.splice(index_cw+1-decalage,index_cw+size_cw-2-decalage);
+                //// TODO: Finir recupération pos tag jeuxdemots
+                rezo.getPosTagFromJDM(words_joined.mot,(pos_tag)=>{
+                    words_joined.nature = pos_tag;
+
+                    phrase[index_cw-decalage] = words_joined;
+                    decalage = decalage + size_cw-1;
+                    callbackFor();
+                });
+
+            });
+        }
+    }, err => {
+        if (err) console.error(err.message);
+        callback(phrase);
+    });
+
+}
+
+/*
+Gérer les relative : que qui
+subordonné avec que
+
+la nourriture de cet hôtel que j'aime bien est déguelasse
+
+groupe nominaux prépositionnel
+
+négation en priorité également
+
+voir ce qui est urgent dans les avis
+
+
+suivi taln mettre les heuristiques
+définir une mesure sur 100 avis par exemple
+
+pattern devoir : devoir faire un effort
+
+la qualité de la nourriture est remarquable
+
+qualité du services
+
+
+satisfait appareil
+
+
+injecteur des regex
+ */
 
 module.exports.parserPhrase = parserPhrase;

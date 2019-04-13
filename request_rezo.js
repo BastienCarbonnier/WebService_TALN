@@ -24,6 +24,9 @@ function findMaxPoidsRelSortante(data,callback){
 }
 
 
+function getPosTagFromJDM(mot,callback){
+    callback("");
+}
 function makeGetRequestRezoDump (word,rel_id,param,callback){
     var url = windows1252.encode("http://www.jeuxdemots.org/rezo-dump.php?gotermsubmit=Chercher&gotermrel="+word+"&rel="+rel_id+(param==null?"":param));
     console.log(url);
@@ -49,3 +52,4 @@ function makeGetRequestRezoDump (word,rel_id,param,callback){
 
 module.exports.makeGetRequestRezoDump = makeGetRequestRezoDump;
 module.exports.findMaxPoidsRelSortante =findMaxPoidsRelSortante;
+module.exports.getPosTagFromJDM =getPosTagFromJDM;

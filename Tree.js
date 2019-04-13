@@ -110,7 +110,10 @@ Tree.prototype.addWord = function(compound_word,callback) {
                 callbackFor(false);
             }
             else{
-                currentNode = currentNode.children[indexNode];
+                if (key==compound_word_tab.length-1){
+                    currentNode.children[indexNode].isLeaf = true;
+                }
+                currentNode =currentNode.children[indexNode];
                 callbackFor(false);
             }
         });
@@ -123,9 +126,8 @@ Tree.prototype.addWord = function(compound_word,callback) {
 };
 
 
-Tree.prototype.containsCompoundWord = function(compound_word,callback) {
+Tree.prototype.containsCompoundWord = function(words,callback) {
 
-    let words = compound_word.split(" ");
     let nbr_mot_init = words.length;
 
     let root = this._root;
@@ -148,7 +150,7 @@ Tree.prototype.containsCompoundWord = function(compound_word,callback) {
 
     // On prend et on supprime le premier mot de words
 
-    let currentWord = words[0];
+    let currentWord = words[0].mot;
     let words_save;
     //words = words.slice(1);
 
@@ -156,19 +158,19 @@ Tree.prototype.containsCompoundWord = function(compound_word,callback) {
 
     let findCW = false;
     async.whilst( // Tant que nous n'arrivons pas à la fin de la phrase
-        function () { return  currentTree && !endCW; },//check condition.
+        function () { return  currentTree && !endCW ; },//check condition.
         function (callback1) {
             find = false;
             async.whilst( // Pour chaque enfant à moins que nous trouvions le mot
-                function () { return  !find && i < nbr_children; },//check condition.
+                function () { return  !find && i < nbr_children ; },//check condition.
                 function (callback2) {
                     if(childrens[i].text == currentWord){
-                        //console.log("Fils trouvé : " + childrens[i].text+" "+currentWord);
+                        console.log("Fils trouvé : " + childrens[i].text+" "+currentWord);
                         find = true;
                         callback2(null,true);
                     }
                     else{
-                        //console.log("Fils non trouvé : " + childrens[i].text+" "+currentWord);
+                        console.log("Fils non trouvé : " + childrens[i].text+" "+currentWord);
                         i++;
                         find=false;
                         callback2(null,false);
@@ -182,7 +184,7 @@ Tree.prototype.containsCompoundWord = function(compound_word,callback) {
                             endCW = true;
                             if (childrens[i].isLeaf){
                                 // On enregistre le mot composé
-                                max_cw[nbr_mot_init-words.length-size+1]= size;
+                                max_cw[nbr_mot_init-words.length-size]= size;
                                 //console.log(max_cw);
                                 size=0;
                                 findCW = true;
@@ -195,29 +197,34 @@ Tree.prototype.containsCompoundWord = function(compound_word,callback) {
                         else{
                             // Si ce n'est pas la fin et que c'est une feuille
                             if (childrens[i].isLeaf){
+                                //console.log("Je suis une feuille")
                                 findCW = true;
                                 // On enregistre le mot composé
-                                max_cw[nbr_mot_init-words.length-size+1]= size;
+                                max_cw[nbr_mot_init-words.length-size]= size;
 
                                 if (words_save==undefined){
                                     words_save = words.slice();
                                     words = words.slice(1);
-                                    currentWord = words[0];
+                                    currentWord = words[0].mot;
                                 }
                                 else{
                                     words = words_save.slice(1);
-                                    currentWord = words[0];
+                                    currentWord = words[0].mot;
                                     words_save = undefined;
                                 }
 
 
                             }
                             else{
+                                //console.log("Je ne suis pas une feuille")
+                                //console.log(childrens[i]);
                                 if (words_save == undefined){
                                     words_save = words.slice();
                                 }
+                                currentWord = words[0].mot;
+
                                 words = words.slice(1);
-                                currentWord = words[0];
+
                             }
                             endCW = false;
                             currentTree = childrens[i];
@@ -238,11 +245,13 @@ Tree.prototype.containsCompoundWord = function(compound_word,callback) {
                             if (words_save != undefined){
                                 words = words_save.slice(1);
                                 words_save = undefined;
-                                currentWord = words[0];
+                                currentWord = words[0].mot;
                             }
                             else{
+                                currentWord = words[0].mot;
                                 words = words.slice(1);
-                                currentWord = words[0];
+
+
                             }
 
                             size=0;

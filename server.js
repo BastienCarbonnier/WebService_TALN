@@ -11,8 +11,9 @@ var express     = require('express'),
 const app = express();
 const port = 3000;
 
+let mc_tree;
 app.get('/', (req, res) => {
-    let mc_tree;
+
     parseur.parserPhrase(req.query.phrase,mc_tree, (tab_phrase)=>{
         polarisation.getPolaritePhrase(tab_phrase, (tab_phrase_polarise)=>{
             res.json(tab_phrase_polarise);
@@ -22,7 +23,8 @@ app.get('/', (req, res) => {
 
 });
 
-tools.initialisation(()=>{
+tools.initialisation((tree)=>{
+    mc_tree = tree;
     app.listen(port, (err) => {
         if (err) {
             return console.log('something bad happened', err);

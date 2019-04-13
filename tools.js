@@ -16,13 +16,14 @@ function initialisation (callback){
         if (err) throw err;
         let mc_tab = mc.split("\n");
         creationArbrePrefixe(mc_tab, (mc_tree)=>{
-
-          let mot = "Je n'ai pas pu prendre un bain car la salle de bain turque était très sale";
+        /*
+          let mot = [{ "index": 0, "mot": 'La', "nature": 'DET' },{ "index": 1, "mot": 'salle', "nature": 'NOUN' },{ "index": 2, "mot": 'de', "nature": 'ADP' },{ "index": 3, "mot": 'bain', "nature": 'NOUN' },{ "index": 4, "mot": 'était', "nature": 'AUX' },{ "index": 5, "mot": 'vraiment', "nature": 'ADV' },{ "index": 6, "mot": 'très', "nature": 'ADV' },{ "index": 7, "mot": 'sale', "nature": 'ADJ'}];
 
            mc_tree.containsCompoundWord(mot, (err,exist,max_cw)=>{
                console.log(max_cw);
 
            });
+          */
             callback(mc_tree);
         });
     });
