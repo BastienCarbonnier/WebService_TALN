@@ -15,7 +15,7 @@ let mc_tree;
 app.get('/', (req, res) => {
 
     parseur.parserPhrase(req.query.phrase,mc_tree, (tab_phrase)=>{
-        polarisation.getPolaritePhrase(tab_phrase, (tab_phrase_polarise)=>{
+        polarisation.getVecteurPolaritePhrase(tab_phrase, (tab_phrase_polarise)=>{
             res.json(tab_phrase_polarise);
         });
     });

@@ -39,6 +39,41 @@ function getPolaritePhrase(phrase,callback){
 
     });
 }
+
+function getVecteurPolaritePhrase(phrase,callback){
+    let phrase_pol = [];
+    async.forEachOf(phrase, (value, key, callbackFor) => {
+        let mot_pol = {};
+        mot_pol = value;
+
+
+        if (mot_pol.nature!="ADP" && mot_pol.nature!="DET"){
+            getVecteurPolariteMot(value.mot,function(pol){
+                mot_pol.pol = pol;
+                phrase_pol[value.index]=mot_pol;
+                callbackFor();
+            });
+        }
+        else{
+            mot_pol.pol = {neg : 0,pos:0,neutre:0};
+            phrase_pol[value.index]=mot_pol;
+            callbackFor();
+        }
+
+
+    }, err => {
+        if (err) console.error(err.message);
+        console.log(phrase_pol);
+        callback(phrase_pol);
+        /*
+        propagerPolarite(phrase_pol, (phrase_propa) =>{
+            callback(phrase_propa);
+        });
+        */
+
+    });
+}
+
 function filter_array(array) {
     var index = -1,
         arr_length = array ? array.length : 0,
@@ -149,7 +184,6 @@ function sum_vector(pol1,pol2){
 
 
 function getVecteurPolariteMot (mot,callback){
-    mot = "propreté";
     cache.getFromCache(mot, (find,data)=>{
         if (find){
             let vecteur = {};
@@ -159,7 +193,7 @@ function getVecteurPolariteMot (mot,callback){
             callback(vecteur);
         }
         else{
-            getFromRezoDump(mot,(err,vect)=>{
+            getPolFromRezoDump(mot,(err,vect)=>{
                 if(err==-1) console.log("Erreur lors de la reqûete");
                 else callback(vect);
             });
@@ -168,7 +202,7 @@ function getVecteurPolariteMot (mot,callback){
     });
 }
 
-function getFromRezoDump(mot,callback){
+function getPolFromRezoDump(mot,callback){
     let code_pol = {
         pos : 223173,
         neutre : 241794,
@@ -202,7 +236,6 @@ function getFromRezoDump(mot,callback){
                     let data = {
                         id : Number(tab_res[2]),
                         mot : mot,
-                        pos_tag : "",
                         pol_pos : vecteur.pos,
                         pol_neutre : vecteur.neutre,
                         pol_neg : vecteur.neg,
@@ -282,4 +315,5 @@ function getPolariteMot (mot,callback){
 }
 
 module.exports.getPolaritePhrase = getPolaritePhrase;
+module.exports.getVecteurPolaritePhrase = getVecteurPolaritePhrase;
 module.exports.getVecteurPolariteMot =getVecteurPolariteMot;

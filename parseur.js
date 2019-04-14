@@ -35,7 +35,6 @@ function parserPhrase(phrase,mc_tree,callback){
                 // On propage les pos tag par proximité
                 PythonShell.run('propage_pos_tag.py', options, function (err, results) {
                     if (err) throw err;
-
                     let phrase_pos_prop = JSON.parse(JSON.stringify(results[0]));
                     console.log(phrase_pos_prop);
                     callback(phrase_pos_prop);
@@ -52,8 +51,8 @@ function joinCompoundWords (phrase,cw_index,callback){
     let decalage = 0;
     async.forEachOf(cw_index, (size_cw, index_cw, callbackFor) => {
         if (size_cw == 0){
-            if(index_cw<phrase.length)
-                phrase[index_cw].index = phrase[index_cw].index -decalage;
+            if(index_cw-decalage<phrase.length)
+            phrase[index_cw-decalage].index = index_cw-decalage;
             callbackFor();
         }
         else{
@@ -81,6 +80,7 @@ function joinCompoundWords (phrase,cw_index,callback){
         }
     }, err => {
         if (err) console.error(err.message);
+        console.log(phrase);
         callback(phrase);
     });
 

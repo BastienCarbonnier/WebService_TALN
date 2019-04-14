@@ -11,7 +11,6 @@ function addToCache(data, callback){
 
     let data_string = data.id+";"+
     data.mot + ";" +
-    data.pos_tag + ";"+
     data.pol_pos + ";"+
     data.pol_neutre + ";"+
     data.pol_neg+"\n";
@@ -37,7 +36,6 @@ function getFromCache(mot,callback){
                 if(elts[1]==mot){
                     data = {
                         id : Number(elts[0]),
-                        pos_tag : elts[2],
                         pol_pos : Number(elts[3]),
                         pol_neutre : Number(elts[4]),
                         pol_neg :Number(elts[5])
