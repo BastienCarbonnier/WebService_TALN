@@ -182,14 +182,109 @@ function sum_vector(pol1,pol2){
     return {neg : pol1.neg+pol2.neg, neutre:pol1.neutre+pol2.neutre,pos:pol1.pos+pol2.pos};
 }
 
+function propagerPolariteVecteur(tokens,callback){
+
+    let phrase_pol = [];
+
+    async.forEachOf(tokens, (value, key, callbackFor) => {
+        let current = {};
+
+        current = value;
+        /*
+        if (current.nature == "ADJ") {
+
+            async.forEachOf(current.index_adv,(value, key, callbackFor2) => {
+                let token = tokens[value];
+
+                if (token.pol<0 && current.pol <=0){
+                    current.pol--;
+                }
+                else if (token.pol>0 && current.pol >=0) {
+                    current.pol++;
+                }
+                else if (token.pol>0 && current.pol<0){
+                    current.pol--;
+                }
+                callbackFor2();
+
+            }, err => {
+                if (err) console.error(err.message);
+                phrase_pol[current.index]=current;
+                callbackFor();
+            });
+        }
+        else{
+            phrase_pol[current.index]=current;
+            callbackFor();
+        }
+        */
+       phrase_pol[current.index]=current;
+       callbackFor();
+    }, err => {
+        if (err) console.error(err.message);
+
+        async.forEachOf(phrase_pol, (value, key, callbackFor2) => {
+            let current = {};
+
+            current = value;
+            if (current.nature=="NOUN"){
+                let sum_pol=0;
+
+                async.forEachOf(current.index_adj,(value, key, callbackFor3) => {
+                    console.log("-------- phrase_pol[value]");
+                    console.log(phrase_pol[value]);
+                    sum_pol += phrase_pol[value].pol;
+                    console.log(sum_pol);
+                    callbackFor3();
+                }, err => {
+                    if (err) console.error(err.message);
+
+                    console.log("-------- sum_pol");
+                    console.log(sum_pol);
+
+                    if (sum_pol<0 && current.pol <=0){
+                        current.pol--;
+                    }
+                    else if (sum_pol>0 && current.pol >=0) {
+                        current.pol++;
+                    }
+                    else if (sum_pol>0 && current.pol<0){
+                        current.pol--;
+                    }
+
+                    phrase_pol[current.index]=current;
+                    callbackFor2();
+                });
+                //let mean = sum_pol/current.index_adj.length;
+            }
+            else{
+                phrase_pol[current.index]=current;
+                callbackFor2();
+            }
+
+
+        }, err => {
+            if (err) console.error(err.message);
+            callback(phrase_pol);
+
+        });
+    });
+
+
+}
+
 
 function getVecteurPolariteMot (mot,callback){
     cache.getFromCache(mot, (find,data)=>{
         if (find){
+            console.log("********** data");
+            console.log(data);
             let vecteur = {};
-            vecteur.pos = data.pol_pos;
-            vecteur.neutre = data.pol_neutre;
-            vecteur.neg = data.pol_neg;
+            let total = data.pol_pos+data.pol_neutre+data.pol_neg;
+
+            vecteur.pos = +(data.pol_pos/total).toFixed(2);
+            vecteur.neutre = +(data.pol_neutre/total).toFixed(2);
+            vecteur.neg = +(data.pol_neg/total).toFixed(2);
             callback(vecteur);
         }
         else{

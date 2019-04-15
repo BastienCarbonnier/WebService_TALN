@@ -32,6 +32,10 @@ function parserPhrase(phrase,mc_tree,callback){
             // On join les mots composés et on adapte les index en conséquence
             joinCompoundWords (tab_phrase,max_cw,(tab_phrase_cw)=>{
                 options.args[0] = JSON.stringify(tab_phrase_cw);
+
+                // ajouter gestion regex : find CompoundWordWithRegex
+                // Créer un fichier de regex
+
                 // On propage les pos tag par proximité
                 PythonShell.run('propage_pos_tag.py', options, function (err, results) {
                     if (err) throw err;

@@ -36,9 +36,9 @@ function getFromCache(mot,callback){
                 if(elts[1]==mot){
                     data = {
                         id : Number(elts[0]),
-                        pol_pos : Number(elts[3]),
-                        pol_neutre : Number(elts[4]),
-                        pol_neg :Number(elts[5])
+                        pol_pos : Number(elts[2]),
+                        pol_neutre : Number(elts[3]),
+                        pol_neg :Number(elts[4])
                     };
                     find = true;
                     callback1(find);

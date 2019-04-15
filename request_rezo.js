@@ -22,6 +22,9 @@ function findMaxPoidsRelSortante(data,callback){
     callback(max_index);
 }
 
+/*
+Récupérer si le mot appartient à l'ontologie
+ */
 
 function getPosTagFromJDM(mot,callback){
     console.log("######### Dans get pos tag #######");
