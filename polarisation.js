@@ -64,12 +64,11 @@ function getVecteurPolaritePhrase(phrase,callback){
     }, err => {
         if (err) console.error(err.message);
         console.log(phrase_pol);
-        callback(phrase_pol);
-        /*
-        propagerPolarite(phrase_pol, (phrase_propa) =>{
+
+        propagerPolariteVecteur(phrase_pol, (phrase_propa) =>{
             callback(phrase_propa);
         });
-        */
+
 
     });
 }
@@ -224,41 +223,27 @@ function propagerPolariteVecteur(tokens,callback){
         if (err) console.error(err.message);
 
         async.forEachOf(phrase_pol, (value, key, callbackFor2) => {
-            let current = {};
+            let current1 = {};
 
-            current = value;
-            if (current.nature=="NOUN"){
-                let sum_pol=0;
+            current1 = value;
+            if (current1.nature=="NOUN"){
+                let max_vecteur = current1.pol;
 
-                async.forEachOf(current.index_adj,(value, key, callbackFor3) => {
-                    console.log("-------- phrase_pol[value]");
-                    console.log(phrase_pol[value]);
-                    sum_pol += phrase_pol[value].pol;
-                    console.log(sum_pol);
+                async.forEachOf(current1.index_adj,(value, key, callbackFor3) => {
+                    if (phrase_pol[value].pol.neg>0.5){
+                        max_vecteur = phrase_pol[value].pol;
+                    }
                     callbackFor3();
                 }, err => {
                     if (err) console.error(err.message);
-
-                    console.log("-------- sum_pol");
-                    console.log(sum_pol);
-
-                    if (sum_pol<0 && current.pol <=0){
-                        current.pol--;
-                    }
-                    else if (sum_pol>0 && current.pol >=0) {
-                        current.pol++;
-                    }
-                    else if (sum_pol>0 && current.pol<0){
-                        current.pol--;
-                    }
-
-                    phrase_pol[current.index]=current;
+                    current1.pol = max_vecteur;
+                    phrase_pol[current1.index]=current1;
                     callbackFor2();
                 });
                 //let mean = sum_pol/current.index_adj.length;
             }
             else{
-                phrase_pol[current.index]=current;
+                phrase_pol[current1.index]=current1;
                 callbackFor2();
             }
 
