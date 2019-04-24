@@ -20,6 +20,10 @@ def findAdjectifForNouns(phrase,i_nom):
             i_d+=1
         elif phrase[i_d]["nature"]=="AUX":
             i_d+=1
+        elif phrase[i_d]["mot"]=="que":
+            i_d+=1
+        elif phrase[i_d]["nature"]=="PRON": # "cette hotel qui est magnifique" PROBLEME : "La télévision qui se trouvait dans la chambre était assez grande et moderne"
+            i_d+=1
         elif phrase[i_d]["nature"]=="CCONJ": # pour la conjonction et ex : "Globalement très bon hôtel et personnel très accueillant et actif." prendre en compte "accueillant" et (CCONJ) "actif"
             i_d+=1
         else:
@@ -80,6 +84,12 @@ def findVerbeForNouns(phrase,i_nom):
             i_d+=1
         elif phrase[i_d]["nature"]=="ADV":
             i_d+=1
+        elif phrase[i_d]["mot"]=="que":
+            i_d+=1
+        elif phrase[i_d]["nature"]=="PRON":
+            i_d+=1
+        elif phrase[i_d]["nature"]=="CCONJ":
+            i_d+=1
         else:
             break
 
@@ -93,6 +103,8 @@ def findVerbeForNouns(phrase,i_nom):
         elif phrase[i_g]["nature"]=="DET":
             i_g-=1
         elif phrase[i_g]["nature"]=="ADV":
+            i_g-=1
+        elif phrase[i_g]["nature"]=="CCONJ":
             i_g-=1
         else:
             break
@@ -120,6 +132,19 @@ def findAdverbsForVerbes(phrase,i_adj):
     return index_adv
 
 list = json.loads(sys.argv[1])
+
+
+# nlp = spacy.load("fr_core_news_sm")
+# doc = nlp(sys.argv[1])
+
+# list =[]
+# i = 0
+
+# for token in doc:
+#     if not token.is_punct :
+#         t = {"index":i,"mot":token.text, "nature": token.pos_}
+#         list.append(t)
+#         i=i+1
 
 for index,item in enumerate(list):
     if item["nature"] == "NOUN":
