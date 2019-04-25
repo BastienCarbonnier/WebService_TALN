@@ -18,7 +18,7 @@ function parserPhrase(phrase,mc_tree,callback){
         args: []
     };
 
-    options.args[0] = "la salle de bain était très sale";//phrase;
+    options.args[0] = "la chambre qui est belle";//phrase;
     // On récupère les pos_tag de chaque mots
     PythonShell.run('get_pos_tag.py', options, function (err, results) {
         if (err) throw err;
@@ -88,35 +88,34 @@ function joinCompoundWords (phrase,cw_index,callback){
         callback(phrase);
     });
 
+    /*
+    Gérer les relative : que qui
+    subordonné avec que
+
+    la nourriture de cet hôtel que j'aime bien est déguelasse
+
+    groupe nominaux prépositionnel
+
+    négation en priorité également
+
+    voir ce qui est urgent dans les avis
+
+
+    suivi taln mettre les heuristiques
+    définir une mesure sur 100 avis par exemple
+
+    pattern devoir : devoir faire un effort
+
+    la qualité de la nourriture est remarquable
+
+    qualité du services
+
+
+    satisfait appareil
+
+
+    injecteur des regex
+     */
 }
-
-/*
-Gérer les relative : que qui
-subordonné avec que
-
-la nourriture de cet hôtel que j'aime bien est déguelasse
-
-groupe nominaux prépositionnel
-
-négation en priorité également
-
-voir ce qui est urgent dans les avis
-
-
-suivi taln mettre les heuristiques
-définir une mesure sur 100 avis par exemple
-
-pattern devoir : devoir faire un effort
-
-la qualité de la nourriture est remarquable
-
-qualité du services
-
-
-satisfait appareil
-
-
-injecteur des regex
- */
 
 module.exports.parserPhrase = parserPhrase;
