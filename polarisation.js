@@ -180,7 +180,8 @@ function sum_vector(pol1,pol2){
     sum_pol = {};
     return {neg : pol1.neg+pol2.neg, neutre:pol1.neutre+pol2.neutre,pos:pol1.pos+pol2.pos};
 }
-
+// Lexique a part et coefficient d'intensification
+// gérer négation : ne et pas inversion
 function propagerPolariteVecteur(tokens,callback){
 
     let phrase_pol = [];
