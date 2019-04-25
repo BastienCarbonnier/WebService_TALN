@@ -134,7 +134,7 @@ def findAdverbsForVerbes(phrase,i_adj):
 list = json.loads(sys.argv[1])
 
 
-# nlp = spacy.load("fr_core_news_sm")
+nlp = spacy.load("fr_core_news_sm")
 # doc = nlp(sys.argv[1])
 
 # list =[]
