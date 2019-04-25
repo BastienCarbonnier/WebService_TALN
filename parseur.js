@@ -96,7 +96,7 @@ function joinCompoundWords (phrase,cw_index,callback){
 
     groupe nominaux prépositionnel
 
-    négation en priorité également
+    négation en priorité également (mettre un paramètre pour inverser)
 
     voir ce qui est urgent dans les avis
 
@@ -114,7 +114,7 @@ function joinCompoundWords (phrase,cw_index,callback){
     satisfait appareil
 
 
-    injecteur des regex
+    injecteur des regex (avant mot composé)
      */
 }
 
