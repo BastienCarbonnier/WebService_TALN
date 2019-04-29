@@ -13,17 +13,17 @@ var async       = require("async"),
 let {PythonShell} = require('python-shell');
 function parserPhrase(phrase,mc_tree,callback){
     var options = {
-        mode: 'json',
+        mode: 'text',
         scriptPath: './python/',
         args: []
     };
-
-    options.args[0] = "la chambre qui est belle";//phrase;
+    options.args[0] = phrase;
     // On récupère les pos_tag de chaque mots
     PythonShell.run('get_pos_tag.py', options, function (err, results) {
         if (err) throw err;
-
-        let tab_phrase = JSON.parse(JSON.stringify(results[0]));
+        console.log(results[0])
+        //let tab_phrase = JSON.parse(JSON.stringify(results[0]));
+        let tab_phrase = JSON.parse(results[0]);
         console.log(tab_phrase);
 
         // On vérifie si la phrase contient des mots composés
@@ -39,8 +39,11 @@ function parserPhrase(phrase,mc_tree,callback){
                 // On propage les pos tag par proximité
                 PythonShell.run('propage_pos_tag.py', options, function (err, results) {
                     if (err) throw err;
-                    let phrase_pos_prop = JSON.parse(JSON.stringify(results[0]));
+                    let phrase_pos_prop = JSON.parse(results[0]);
+                    console.log("###### ########Après avoir propagé les pos_tag : ");
                     console.log(phrase_pos_prop);
+
+
                     callback(phrase_pos_prop);
 
                 });

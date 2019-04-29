@@ -131,7 +131,20 @@ def findAdverbsForVerbes(phrase,i_adj):
             break
     return index_adv
 
-list = json.loads(sys.argv[1])
+#list = json.loads(sys.argv[1])
+
+
+nlp = spacy.load("fr_core_news_sm")
+doc = nlp(sys.argv[1])
+
+list =[]
+i = 0
+
+for token in doc:
+    if not token.is_punct :
+        t = {"index":i,"mot":token.text, "nature": token.pos_}
+        list.append(t)
+        i=i+1
 
 for index,item in enumerate(list):
     if item["nature"] == "NOUN":
