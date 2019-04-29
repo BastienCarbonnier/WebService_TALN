@@ -64,7 +64,7 @@ def tagToObj(sentArray):
     sentTab = []
     for t in sentArray:
         if len(t) >1 :
-            sentTab.append({"mot" : t[0], "nature" : tags[t[1]],"tag":t[1],"acc":t[3]})
+            sentTab.append({"mot" : t[0], "nature" : tags[t[1]],"tag":t[1],"lem":t[2],"acc":t[3]})
     return sentTab
 
 def posTaggingTreeTagger(text) :
