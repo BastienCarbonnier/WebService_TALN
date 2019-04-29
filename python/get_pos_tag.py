@@ -57,7 +57,6 @@ tags = {
     "INTJ" : "INTJ",
     "PART" : "PART",
     "X" : "X",
-    "AUX" : "VERB",
     "SENT" : "PUNCT",
     "ABR" : "X"
 }

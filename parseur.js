@@ -77,7 +77,7 @@ function joinCompoundWords (phrase,cw_index,callback){
                 //// TODO: Finir recupération pos tag jeuxdemots
                 rezo.getPosTagFromJDM(words_joined.mot,(pos_tag)=>{
                     words_joined.nature = pos_tag;
-
+                    words_joined.index = index_cw-decalage;
                     phrase[index_cw-decalage] = words_joined;
                     decalage = decalage + size_cw-1;
                     callbackFor();
