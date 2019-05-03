@@ -33,7 +33,7 @@ function getPosTagFromJDM(mot,callback){
 
     let jdm_spacy = {
         "Nom" : "NOUN",
-        "Ver" : "VRB",
+        "Ver" : "VERB",
         "Adv" : "ADV",
         "Adj" : "ADJ"
     };

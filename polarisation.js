@@ -9,37 +9,6 @@ var async       = require("async"),
     rezo        = require('./request_rezo'),
     cache       = require('./cache/gestion_cache');
 
-function getPolaritePhrase(phrase,callback){
-    let phrase_pol = [];
-    async.forEachOf(phrase, (value, key, callbackFor) => {
-        let mot_pol = {};
-        mot_pol = value;
-
-
-        if (mot_pol.nature!="ADP" && mot_pol.nature!="DET"){
-            getPolariteMot(value.mot,function(pol){
-                mot_pol.pol = pol;
-                phrase_pol[value.index]=mot_pol;
-                callbackFor();
-            });
-        }
-        else{
-            mot_pol.pol = 0;
-            phrase_pol[value.index]=mot_pol;
-            callbackFor();
-        }
-
-
-    }, err => {
-        if (err) console.error(err.message);
-        propagerPolarite(phrase_pol, (phrase_propa) =>{
-            callback(phrase_propa);
-        });
-
-
-    });
-}
-
 function getVecteurPolaritePhrase(phrase,callback){
     let phrase_pol = [];
     async.forEachOf(phrase, (value, key, callbackFor) => {
@@ -48,7 +17,7 @@ function getVecteurPolaritePhrase(phrase,callback){
 
 
         if (mot_pol.nature!="ADP" && mot_pol.nature!="DET"){
-            getVecteurPolariteMot(value.mot,function(pol){
+            getVecteurPolariteMot(value.mot,value.lemme,function(pol){
                 mot_pol.pol = pol;
                 phrase_pol[value.index]=mot_pol;
                 callbackFor();
@@ -63,7 +32,6 @@ function getVecteurPolaritePhrase(phrase,callback){
 
     }, err => {
         if (err) console.error(err.message);
-        console.log(phrase_pol);
 
         propagerPolariteVecteur(phrase_pol, (phrase_propa) =>{
             callback(phrase_propa);
@@ -260,11 +228,12 @@ function propagerPolariteVecteur(tokens,callback){
 }
 
 
-function getVecteurPolariteMot (mot,callback){
+function getVecteurPolariteMot (mot,lemme,callback){
+    console.log("#### Lemme");
+    console.log(lemme=="<unknown>");
     cache.getFromCache(mot, (find,data)=>{
         if (find){
-            console.log("********** data");
-            console.log(data);
+
             let vecteur = {};
             let total = data.pol_pos+data.pol_neutre+data.pol_neg;
 
@@ -274,13 +243,54 @@ function getVecteurPolariteMot (mot,callback){
             callback(vecteur);
         }
         else{
+            // get polarisation for the word
             getPolFromRezoDump(mot,(err,vect)=>{
-                if(err==-1) console.log("Erreur lors de la reqûete");
+                if(err==-1) {
+                    // get polarisation from lem
+                    if (lemme!="<unknown>"){
+                        cache.getFromCache(lemme, (find,data)=>{
+                            if (find){
+                                let vecteur = {};
+                                let total = data.pol_pos+data.pol_neutre+data.pol_neg;
+
+                                vecteur.pos = +(data.pol_pos/total).toFixed(2);
+                                vecteur.neutre = +(data.pol_neutre/total).toFixed(2);
+                                vecteur.neg = +(data.pol_neg/total).toFixed(2);
+                                callback(vecteur);
+                            }
+                            else{
+                                getPolFromRezoDump(lemme,(err,vect_lem)=>{
+                                    if(err==-1) {
+
+                                        console.log("Polarisation par défaut");
+                                        let vecteur = {};
+
+                                        vecteur.pos = 0.20;
+                                        vecteur.neutre = 0.60;
+                                        vecteur.neg = 0.20;
+                                        callback(vecteur);
+                                    }
+                                    else callback(vect_lem);
+                                });
+                            }
+                        });
+                    }
+                    else{
+                        console.log("Polarisation par défaut");
+                        let vecteur = {};
+
+                        vecteur.pos = 0.20;
+                        vecteur.neutre = 0.60;
+                        vecteur.neg = 0.20;
+                        callback(vecteur);
+                    }
+                }
                 else callback(vect);
             });
         }
 
     });
+
 }
 
 function getPolFromRezoDump(mot,callback){
@@ -311,9 +321,17 @@ function getPolFromRezoDump(mot,callback){
                     }
                     callbackFor();
                 }, resultat => {
+
                     vecteur.pos= (vecteur.pos==undefined)?0:vecteur.pos;
                     vecteur.neutre =(vecteur.neutre==undefined)?0:vecteur.neutre;
                     vecteur.neg =(vecteur.neg==undefined)?0:vecteur.neg;
+
+                    let total = vecteur.pos+vecteur.neutre+vecteur.neg;
+
+                    vecteur.pos = +(vecteur.pos/total).toFixed(2);
+                    vecteur.neutre = +(vecteur.neutre/total).toFixed(2);
+                    vecteur.neg = +(vecteur.neg/total).toFixed(2);
+
                     let data = {
                         id : Number(tab_res[2]),
                         mot : mot,
@@ -395,6 +413,5 @@ function getPolariteMot (mot,callback){
 
 }
 
-module.exports.getPolaritePhrase = getPolaritePhrase;
 module.exports.getVecteurPolaritePhrase = getVecteurPolaritePhrase;
 module.exports.getVecteurPolariteMot =getVecteurPolariteMot;

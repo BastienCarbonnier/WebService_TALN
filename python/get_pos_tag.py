@@ -4,14 +4,14 @@ import json
 import treetaggerwrapper
 import warnings
 
-def fxn():
-    warnings.warn("deprecated", FutureWarning)
+from spellchecker import SpellChecker
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    fxn()
+spell = SpellChecker(language="fr")
+
+
 
 tagger = treetaggerwrapper.TreeTagger(TAGLANG='fr',TAGOPT="-prob -threshold 0.7 -token -lemma -sgml -quiet")
+
 tags = {
     "VER:cond":"VERB",
     "VER:futu":"VERB",
@@ -64,7 +64,7 @@ def tagToObj(sentArray):
     sentTab = []
     for t in sentArray:
         if len(t) >1 :
-            sentTab.append({"mot" : t[0], "nature" : tags[t[1]],"tag":t[1],"lem":t[2],"acc":t[3]})
+            sentTab.append({"mot" : spell.correction(t[0]), "nature" : tags[t[1]],"tag":t[1],"lemme":t[2],"acc":t[3]})
     return sentTab
 
 def posTaggingTreeTagger(text) :

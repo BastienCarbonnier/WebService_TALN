@@ -34,9 +34,6 @@ tools.initialisation((tree)=>{
         if (err) {
             return console.log('something bad happened', err);
         }
-        polarisation.getVecteurPolariteMot("méchant",function(vecteur){
-            console.log(vecteur);
-        });
         console.log(`server is listening on ${port}`);
     });
 });
