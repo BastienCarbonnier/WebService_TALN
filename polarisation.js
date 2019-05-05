@@ -7,7 +7,7 @@ var async       = require("async"),
     cheerio     = require('cheerio'),
     windows1252 = require('windows-1252'),
     rezo        = require('./request_rezo'),
-    cache       = require('./cache/gestion_cache');
+    cache       = require('./ressources/caches/cache_polarisation/gestion_cache');
 
 function getVecteurPolaritePhrase(phrase,callback){
     let phrase_pol = [];

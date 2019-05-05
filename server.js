@@ -2,12 +2,12 @@
 /*jshint esversion: 6 */
 /* jshint expr: true */
 
-var express     = require('express'),
-    async       = require("async"),
-    polarisation = require('./polarisation'),
-    parseur     = require('./parseur'),
-    tools       = require('./tools');
-var cors = require('cors');
+var express      = require('express'),
+async        = require("async"),
+polarisation = require('./polarisation'),
+parseur      = require('./parseur'),
+tools        = require('./tools'),
+cors         = require('cors');
 
 
 const app = express();
@@ -19,12 +19,11 @@ app.get('/', (req, res) => {
 
     parseur.parserPhrase(req.query.phrase,mc_tree, (tab_phrase)=>{
         polarisation.getVecteurPolaritePhrase(tab_phrase, (tab_phrase_polarise)=>{
-            console.log("test "+tab_phrase_polarise);
-             res.setHeader("Content-type", "application/json");
+            res.setHeader("Content-type", "application/json");
             res.end(JSON.stringify(tab_phrase_polarise));
         });
     });
-
+    
 
 });
 
@@ -75,4 +74,4 @@ A faire :
 Mots composé : supprimer mots (majuscule)
 Regarder analyseur
 
- */
+*/

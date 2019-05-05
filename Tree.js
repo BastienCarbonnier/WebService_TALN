@@ -1,7 +1,7 @@
 /*jslint node: true */
 /*jshint esversion: 6 */
 /* jshint expr: true */
-var async       = require("async");
+var async = require("async");
 function Node(text) {
     this.text = text;
     this.parent = null;
@@ -149,6 +149,7 @@ Tree.prototype.containsCompoundWord = function(words,callback) {
 
 
     // On prend et on supprime le premier mot de words
+    let is_first_word = true;
 
     let currentWord = words[0].mot;
     let words_save;
@@ -183,8 +184,9 @@ Tree.prototype.containsCompoundWord = function(words,callback) {
                         if (words.length==0){ // On est à la fin de la phrase
                             endCW = true;
                             if (childrens[i].isLeaf){
+                                let index = nbr_mot_init-words.length-size+1;
                                 // On enregistre le mot composé
-                                max_cw[nbr_mot_init-words.length-size]= size;
+                                max_cw[(index>0)?index:0]= size;
                                 //console.log(max_cw);
                                 size=0;
                                 findCW = true;
@@ -199,8 +201,9 @@ Tree.prototype.containsCompoundWord = function(words,callback) {
                             if (childrens[i].isLeaf){
                                 //console.log("Je suis une feuille")
                                 findCW = true;
+                                let index = nbr_mot_init-words.length-size+1;
                                 // On enregistre le mot composé
-                                max_cw[nbr_mot_init-words.length-size]= size;
+                                max_cw[(index>0)?index:0]= size;
 
                                 if (words_save==undefined){
                                     words_save = words.slice();
@@ -222,8 +225,14 @@ Tree.prototype.containsCompoundWord = function(words,callback) {
                                     words_save = words.slice();
                                 }
                                 currentWord = words[0].mot;
+                                if(is_first_word){
+                                    currentWord = words[1].mot;
+                                }
 
                                 words = words.slice(1);
+                                console.log("words[0].mot après slice");
+                                console.log(currentWord);
+
 
                             }
                             endCW = false;
@@ -249,6 +258,7 @@ Tree.prototype.containsCompoundWord = function(words,callback) {
                             }
                             else{
                                 currentWord = words[0].mot;
+                                words_save = words;
                                 words = words.slice(1);
 
 
@@ -265,6 +275,7 @@ Tree.prototype.containsCompoundWord = function(words,callback) {
                     }
                 }
             );
+            is_first_word = false;
 
         },
         function (err,findWord,max_cw) { //final result

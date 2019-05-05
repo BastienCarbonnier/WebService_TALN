@@ -29,7 +29,7 @@ function parserPhrase(phrase,mc_tree,callback){
         // On vérifie si la phrase contient des mots composés
         mc_tree.containsCompoundWord(tab_phrase, (err,exist,max_cw)=>{
             console.log(max_cw);
-            // On join les mots composés et on adapte les index en conséquence
+            // On join les mots composés et on adapte les indexs en conséquence
             joinCompoundWords (tab_phrase,max_cw,(tab_phrase_cw)=>{
                 options.args[0] = JSON.stringify(tab_phrase_cw);
 
@@ -59,7 +59,7 @@ function joinCompoundWords (phrase,cw_index,callback){
     async.forEachOf(cw_index, (size_cw, index_cw, callbackFor) => {
         if (size_cw == 0){
             if(index_cw-decalage<phrase.length)
-            phrase[index_cw-decalage].index = index_cw-decalage;
+                phrase[index_cw-decalage].index = index_cw-decalage;
             callbackFor();
         }
         else{
@@ -72,11 +72,16 @@ function joinCompoundWords (phrase,cw_index,callback){
                 callbackFor1();
             }, err => {
                 if (err) console.error(err.message);
+                if (index_cw == 0){
+                    phrase.splice(index_cw+1-decalage,index_cw+size_cw-1-decalage);
+                }
+                else{
+                    phrase.splice(index_cw+1-decalage,index_cw+size_cw-2-decalage);
+                }
 
-                phrase.splice(index_cw+1-decalage,index_cw+size_cw-2-decalage);
-                //// TODO: Finir recupération pos tag jeuxdemots
                 rezo.getPosTagFromJDM(words_joined.mot,(pos_tag)=>{
                     words_joined.nature = pos_tag;
+                    words_joined.lemme = "<unknown>";
                     words_joined.index = index_cw-decalage;
                     phrase[index_cw-decalage] = words_joined;
                     decalage = decalage + size_cw-1;
