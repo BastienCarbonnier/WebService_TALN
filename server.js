@@ -12,8 +12,8 @@ var bodyParser = require('body-parser');
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.urlencoded({extended : true}));
-app.use(express.json());
+//app.use(bodyParser.urlencoded({extended : true}));
+app.use(bodyParser.json());
 const port = 3000;
 
 let mc_tree;
