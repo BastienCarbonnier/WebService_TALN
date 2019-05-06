@@ -3,6 +3,8 @@ import sys
 import json
 import spacy
 
+listAux = ["être", "suis", "es", "est", "sommes", "êtes", "sont", "été", "étais", "était", "étions","étiez", "étaient", "serai", "sera", "serons","seront","serez", "ai", "as","a","avons","aviez","avaient","avez","ont","avais","avait","avions","eus", "aurai", "auras","aura","aurons","aurez","auront"]
+
 def findAdjectifForNouns(phrase,i_nom):
     index_adj = []
     i_d = i_nom+1
@@ -18,7 +20,7 @@ def findAdjectifForNouns(phrase,i_nom):
             i_d+=1
         elif phrase[i_d]["nature"]=="ADV":
             i_d+=1
-        elif phrase[i_d]["nature"]=="AUX":
+        elif phrase[i_d]["mot"] in listAux:
             i_d+=1
         elif phrase[i_d]["mot"]=="que":
             i_d+=1
@@ -39,7 +41,7 @@ def findAdjectifForNouns(phrase,i_nom):
             i_g-=1
         elif phrase[i_g]["nature"]=="ADV":
             i_g-=1
-        elif phrase[i_g]["nature"]=="AUX":
+        elif phrase[i_d]["mot"] in listAux:
             i_g-=1
         elif phrase[i_g]["nature"]=="CCONJ":
             i_g-=1
