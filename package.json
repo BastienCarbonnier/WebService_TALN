@@ -15,6 +15,7 @@
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "fs": "0.0.1-security",
+    "indexer": "^1.0.2",
     "python-shell": "^1.0.7",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
