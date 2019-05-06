@@ -12,22 +12,49 @@ var async       = require("async"),
 
 
 function initialisation (callback){
-    fs.readFile("./mots_composes.txt","binary", (err, mc) => {
+
+    fs.readFile("./ressources/mots_composes_utf8.txt","utf-8", (err, mc) => {
+
         if (err) throw err;
         let mc_tab = mc.split("\n");
         creationArbrePrefixe(mc_tab, (mc_tree)=>{
-        /*
-          let mot = [{ "index": 0, "mot": 'La', "nature": 'DET' },{ "index": 1, "mot": 'salle', "nature": 'NOUN' },{ "index": 2, "mot": 'de', "nature": 'ADP' },{ "index": 3, "mot": 'bain', "nature": 'NOUN' },{ "index": 4, "mot": 'était', "nature": 'AUX' },{ "index": 5, "mot": 'vraiment', "nature": 'ADV' },{ "index": 6, "mot": 'très', "nature": 'ADV' },{ "index": 7, "mot": 'sale', "nature": 'ADJ'}];
-
-           mc_tree.containsCompoundWord(mot, (err,exist,max_cw)=>{
-               console.log(max_cw);
-
-           });
-          */
             callback(mc_tree);
         });
     });
 
+    // http://www.jeuxdemots.org/JDM-LEXICALNET-FR/05012019-LEXICALNET-JEUXDEMOTS-ENTRIES-MWE.txt
+/*
+    var mc = fs.readFileSync("./ressources/mots_composes.txt","binary");
+    var mc_tab = mc.split("\n");
+    creationArbrePrefixe(mc_tab, (mc_tree)=>{
+        var url = windows1252.encode("http://www.jeuxdemots.org/JDM-LEXICALNET-FR/05012019-LEXICALNET-JEUXDEMOTS-ENTRIES-MWE.txt");
+        console.log(url);
+        const options = {
+            uri: url,
+            encoding: 'binary',
+            transform: function (body) {
+                return cheerio.load(body, {decodeEntities: false});
+            }
+        };
+
+        rp(options)
+        .then(($) => {
+
+            var result = $.text();
+            console.log("Telechargement de la page terminé");
+            fs.appendFile("./mots_composes_new.txt", result, (err) => {
+                if (err) throw err;
+                console.log('Ecriture terminé');
+                callback(mc_tree);
+            });
+
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+
+    });
+*/
 }
 
 
@@ -36,12 +63,13 @@ function creationArbrePrefixe(mc_tab,callback){
 
     let mc_tree = new Tree("");
 
-    mc_tab = mc_tab.slice(0,4);
+    mc_tab = mc_tab.slice(0,7);
 
     // Boucle sur chaque mot composés
     async.forEachOf(mc_tab, (value, key, callbackFor) => {
 
         let mot = value.split(";")[1];
+        console.log(mot);
         mc_tree.addWord(mot, (err) => {
             if(err) console.log(err);
             callbackFor();

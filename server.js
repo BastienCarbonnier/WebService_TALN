@@ -82,4 +82,4 @@ A faire :
 Mots composé : supprimer mots (majuscule)
 Regarder analyseur
 
- */
+*/
