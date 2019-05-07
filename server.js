@@ -2,13 +2,13 @@
 /*jshint esversion: 6 */
 /* jshint expr: true */
 
-var express     = require('express'),
-    async       = require("async"),
+var express      = require('express'),
+    async        = require("async"),
     polarisation = require('./polarisation'),
-    parseur     = require('./parseur'),
-    tools       = require('./tools');
-var cors = require('cors');
-var bodyParser = require('body-parser');
+    parseur      = require('./parseur'),
+    tools        = require('./tools'),
+    cors         = require('cors'),
+    bodyParser   = require('body-parser');
 
 const app = express();
 app.use(cors());

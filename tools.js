@@ -21,40 +21,6 @@ function initialisation (callback){
             callback(mc_tree);
         });
     });
-
-    // http://www.jeuxdemots.org/JDM-LEXICALNET-FR/05012019-LEXICALNET-JEUXDEMOTS-ENTRIES-MWE.txt
-/*
-    var mc = fs.readFileSync("./ressources/mots_composes.txt","binary");
-    var mc_tab = mc.split("\n");
-    creationArbrePrefixe(mc_tab, (mc_tree)=>{
-        var url = windows1252.encode("http://www.jeuxdemots.org/JDM-LEXICALNET-FR/05012019-LEXICALNET-JEUXDEMOTS-ENTRIES-MWE.txt");
-        console.log(url);
-        const options = {
-            uri: url,
-            encoding: 'binary',
-            transform: function (body) {
-                return cheerio.load(body, {decodeEntities: false});
-            }
-        };
-
-        rp(options)
-        .then(($) => {
-
-            var result = $.text();
-            console.log("Telechargement de la page terminé");
-            fs.appendFile("./mots_composes_new.txt", result, (err) => {
-                if (err) throw err;
-                console.log('Ecriture terminé');
-                callback(mc_tree);
-            });
-
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-
-    });
-*/
 }
 
 
