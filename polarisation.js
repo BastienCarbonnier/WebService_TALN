@@ -106,20 +106,27 @@ function propagerPolariteVecteur(tokens,callback){
 
             current1 = value;
             if (current1.nature=="NOUN"){
-                let max_vecteur = current1.pol;
-
+                let sum_pos = 0;
+                let sum_neu = 0;
+                let sum_neg = 0;
+                let nbr_adj = 0;
                 async.forEachOf(current1.index_adj,(value, key, callbackFor3) => {
-                    if (phrase_pol[value].pol.neg>0.5){
-                        max_vecteur = phrase_pol[value].pol;
-                    }
+                    sum_pos = sum_pos + phrase_pol[value].pol.pos;
+                    sum_neg = sum_neg + phrase_pol[value].pol.neg;
+                    sum_pos = sum_neu + phrase_pol[value].pol.neu;
+                    nbr_adj = nbr_adj + 1;
                     callbackFor3();
                 }, err => {
                     if (err) console.error(err.message);
-                    current1.pol = max_vecteur;
+                    if (nbr_adj>0){
+                        current1.pol.pos = +(sum_pos/nbr_adj).toFixed(2);;
+                        current1.pol.neg = +(sum_neg/nbr_adj).toFixed(2);;
+                        current1.pol.neutre = +(sum_neu/nbr_adj).toFixed(2);;
+                    }
+                    
                     phrase_pol[current1.index]=current1;
                     callbackFor2();
                 });
-                //let mean = sum_pol/current.index_adj.length;
             }
             else{
                 phrase_pol[current1.index]=current1;
@@ -235,21 +242,26 @@ function getPolFromRezoDump(mot,callback){
                     vecteur.neg =(vecteur.neg==undefined)?0:vecteur.neg;
 
                     let total = vecteur.pos+vecteur.neutre+vecteur.neg;
+                    if (total == 0){
+                        callback(-1);
+                    }
+                    else{
+                        vecteur.pos = +(vecteur.pos/total).toFixed(2);
+                        vecteur.neutre = +(vecteur.neutre/total).toFixed(2);
+                        vecteur.neg = +(vecteur.neg/total).toFixed(2);
 
-                    vecteur.pos = +(vecteur.pos/total).toFixed(2);
-                    vecteur.neutre = +(vecteur.neutre/total).toFixed(2);
-                    vecteur.neg = +(vecteur.neg/total).toFixed(2);
+                        let data = {
+                            id : Number(tab_res[2]),
+                            mot : mot,
+                            pol_pos : vecteur.pos,
+                            pol_neutre : vecteur.neutre,
+                            pol_neg : vecteur.neg,
+                        };
+                        cache.addToCache(data, ()=>{
+                            callback(null,vecteur);
+                        });
+                    }
 
-                    let data = {
-                        id : Number(tab_res[2]),
-                        mot : mot,
-                        pol_pos : vecteur.pos,
-                        pol_neutre : vecteur.neutre,
-                        pol_neg : vecteur.neg,
-                    };
-                    cache.addToCache(data, ()=>{
-                        callback(null,vecteur);
-                    });
                 });
             }
             else{

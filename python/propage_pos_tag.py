@@ -41,7 +41,7 @@ def findAdjectifForNouns(phrase,i_nom):
             i_g-=1
         elif phrase[i_g]["nature"]=="ADV":
             i_g-=1
-        elif phrase[i_d]["mot"] in listAux:
+        elif phrase[i_g]["mot"] in listAux:
             i_g-=1
         elif phrase[i_g]["nature"]=="CCONJ":
             i_g-=1
