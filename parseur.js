@@ -76,7 +76,7 @@ function joinCompoundWords (phrase,cw_index,callback){
     // Boucle sur chaque index des mots composés (index,taille)
     async.forEachOf(cw_index, (size_cw, index_cw, callbackFor) => {
         if (size_cw == 0){
-            if(index_cw-decalage<phrase.length&&index_cw-decalage>0)
+            if(index_cw-decalage<phrase.length&&index_cw-decalage>=0)
                 phrase[index_cw-decalage].index = index_cw-decalage;
             callbackFor();
         }
