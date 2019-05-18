@@ -7,7 +7,9 @@ var async       = require("async"),
     cheerio     = require('cheerio'),
     windows1252 = require('windows-1252'),
     rezo        = require('./request_rezo'),
-    cache       = require('./ressources/caches/cache_polarisation/gestion_cache');
+    cache       = require('./ressources/caches/cache_polarisation/gestion_cache'),
+    path        = require('path'),
+    fs          = require('fs');
 
 function getVecteurPolaritePhrase(phrase,callback){
     let phrase_pol = [];
@@ -33,8 +35,12 @@ function getVecteurPolaritePhrase(phrase,callback){
     }, err => {
         if (err) console.error(err.message);
 
-        propagerPolariteVecteur(phrase_pol, (phrase_propa) =>{
-            callback(phrase_propa);
+
+
+        creationIntensifieurStructure((intensifieurs)=>{
+            propagerPolariteVecteur(phrase_pol,intensifieurs, (phrase_propa) =>{
+                callback(phrase_propa);
+            });
         });
 
 
@@ -58,35 +64,169 @@ function filter_array(array) {
     return result;
 }
 
+function creationIntensifieurStructure(callback){
+    const filename = path.join(__dirname, 'ressources/lexique_intensifieurs.csv');
+    let intensifieurs = {};
+    fs.readFile(filename, (err, content) => {
+        let lines = String(content).split("\n");
+        async.whilst(
+            function() { return lines.length > 0; },
+            function(callback1) {
+                let elts = lines[0].split(":");
+                intensifieurs[String(elts[0])] = Number(elts[1]);
+                lines = lines.slice(1);
+                callback1(false);
+            },
+            function (find) {
+                callback(intensifieurs);
+            }
+        );
+    });
+}
 // Lexique a part et coefficient d'intensification
 // gérer négation : ne et pas inversion
-function propagerPolariteVecteur(tokens,callback){
+function propagerPolariteVecteur(tokens,listIntens,callback){
+    let listAux = ["etes", "ete", "etais", "etait", "etions","etiez", "etaient"];
 
     let phrase_pol = [];
+
 
     async.forEachOf(tokens, (value, key, callbackFor) => {
         let current = {};
 
         current = value;
-        /*
-        if (current.nature == "ADJ") {
 
-            async.forEachOf(current.index_adv,(value, key, callbackFor2) => {
-                let token = tokens[value];
+        if (current.nature == "VERB") {
 
-                if (token.pol<0 && current.pol <=0){
-                    current.pol--;
+            let sum_pos = 0;
+            let sum_neu = 0;
+            let sum_neg = 0;
+            let nbr_adv = 0;
+            let intens_sum = 0;
+            let deja_inverse = false;
+            // Application des adverbe sur le verbe (je recommande guère cet hôtel)
+            async.forEachOf(current.index_adv,(value, key, callbackFor1) => {
+                let intens = listIntens[tokens[value].mot];
+                if (intens != undefined){
+                    intens_sum += intens;
                 }
-                else if (token.pol>0 && current.pol >=0) {
-                    current.pol++;
+                else if (!deja_inverse && (tokens[value].mot == "pas" || tokens[value].mot == "ne" || tokens[value].mot == "n'")) {
+                    let neg = current.pol.neg;
+                    current.pol.neg = current.pol.pos;
+                    current.pol.pos = neg;
+                    deja_inverse = true;
                 }
-                else if (token.pol>0 && current.pol<0){
-                    current.pol--;
+                else{
+                    sum_pos = sum_pos + phrase_pol[value].pol.pos;
+                    sum_neg = sum_neg + phrase_pol[value].pol.neg;
+                    sum_neu = sum_neu + phrase_pol[value].pol.neutre;
+                    nbr_adv = nbr_adv + 1;
                 }
-                callbackFor2();
-
+                callbackFor1();
             }, err => {
                 if (err) console.error(err.message);
+
+                if (nbr_adv>0){
+                    let pol = {};
+                    pol.pos = +(sum_pos/nbr_adv).toFixed(2);
+                    pol.neg = +(sum_neg/nbr_adv).toFixed(2);
+                    pol.neutre = +(sum_neu/nbr_adv).toFixed(2);
+                    current.pol = pol;
+                }
+
+                if (intens_sum != 0){
+                    if (intens_sum > 0){
+                        if (current.pol.pos > current.pol.neg){
+                            current.pol.pos = current.pol.pos * intens_sum;
+                        }
+                        else{
+                            current.pol.neg = current.pol.neg * intens_sum;
+                        }
+                    }
+                    else{
+                        intens_sum = intens_sum * -1;
+                        if (current.pol.pos < current.pol.neg){
+                            current.pol.pos = current.pol.pos * intens_sum;
+                        }
+                        else{
+                            current.pol.neg = current.pol.neg * intens_sum;
+                        }
+                    }
+
+                    let sum_pol = current.pol.pos + current.pol.neg + current.pol.neutre;
+                    current.pol.pos = +(current.pol.pos/sum_pol).toFixed(2);
+                    current.pol.neutre = +(current.pol.neutre/sum_pol).toFixed(2);
+                    current.pol.neg = +(current.pol.neg/sum_pol).toFixed(2);
+                }
+
+
+                phrase_pol[current.index]=current;
+                callbackFor();
+            });
+
+        }
+        else if (current.nature == "ADJ") {
+
+            let sum_pos = 0;
+            let sum_neu = 0;
+            let sum_neg = 0;
+            let nbr_adv = 0;
+            let intens_sum = 0;
+
+            async.forEachOf(current.index_adv,(value, key, callbackFor1) => {
+                let intens = listIntens[tokens[value].mot];
+                if (intens != undefined){
+                    intens_sum += intens;
+                }
+                else if (tokens[value].mot == "pas") {
+                    let neg = current.pol.neg;
+                    current.pol.neg = current.pol.pos;
+                    current.pol.pos = neg;
+                }
+                else{
+                    sum_pos = sum_pos + phrase_pol[value].pol.pos;
+                    sum_neg = sum_neg + phrase_pol[value].pol.neg;
+                    sum_neu = sum_neu + phrase_pol[value].pol.neutre;
+                    nbr_adv = nbr_adv + 1;
+                }
+                callbackFor1();
+            }, err => {
+                if (err) console.error(err.message);
+
+                if (nbr_adv>0){
+                    let pol = {};
+                    pol.pos = +(sum_pos/nbr_adv).toFixed(2);
+                    pol.neg = +(sum_neg/nbr_adv).toFixed(2);
+                    pol.neutre = +(sum_neu/nbr_adv).toFixed(2);
+                    current.pol = pol;
+                }
+
+                if (intens_sum != 0){
+                    if (intens_sum > 0){
+                        if (current.pol.pos > current.pol.neg){
+                            current.pol.pos = current.pol.pos * intens_sum;
+                        }
+                        else{
+                            current.pol.neg = current.pol.neg * intens_sum;
+                        }
+                    }
+                    else{
+                        intens_sum = intens_sum * -1;
+                        if (current.pol.pos > current.pol.neg){
+                            current.pol.pos = current.pol.pos * intens_sum;
+                        }
+                        else{
+                            current.pol.neg = current.pol.neg * intens_sum;
+                        }
+                    }
+
+                    let sum_pol = current.pol.pos + current.pol.neg + current.pol.neutre;
+                    current.pol.pos = +(current.pol.pos/sum_pol).toFixed(2);
+                    current.pol.neutre = +(current.pol.neutre/sum_pol).toFixed(2);
+                    current.pol.neg = +(current.pol.neg/sum_pol).toFixed(2);
+                }
+
+
                 phrase_pol[current.index]=current;
                 callbackFor();
             });
@@ -95,9 +235,7 @@ function propagerPolariteVecteur(tokens,callback){
             phrase_pol[current.index]=current;
             callbackFor();
         }
-        */
-       phrase_pol[current.index]=current;
-       callbackFor();
+
     }, err => {
         if (err) console.error(err.message);
 
@@ -113,19 +251,44 @@ function propagerPolariteVecteur(tokens,callback){
                 async.forEachOf(current1.index_adj,(value, key, callbackFor3) => {
                     sum_pos = sum_pos + phrase_pol[value].pol.pos;
                     sum_neg = sum_neg + phrase_pol[value].pol.neg;
-                    sum_pos = sum_neu + phrase_pol[value].pol.neu;
+                    sum_neu = sum_neu + phrase_pol[value].pol.neutre;
                     nbr_adj = nbr_adj + 1;
                     callbackFor3();
                 }, err => {
                     if (err) console.error(err.message);
                     if (nbr_adj>0){
-                        current1.pol.pos = +(sum_pos/nbr_adj).toFixed(2);;
-                        current1.pol.neg = +(sum_neg/nbr_adj).toFixed(2);;
-                        current1.pol.neutre = +(sum_neu/nbr_adj).toFixed(2);;
+                        let pol = {}
+                        pol.pos = +(sum_pos/nbr_adj).toFixed(2);
+                        pol.neg = +(sum_neg/nbr_adj).toFixed(2);
+                        pol.neutre = +(sum_neu/nbr_adj).toFixed(2);
+                        current1.pol = pol;
                     }
-                    
+
                     phrase_pol[current1.index]=current1;
-                    callbackFor2();
+
+                    sum_pos = 0;
+                    sum_neu = 0;
+                    sum_neg = 0;
+                    nbr_vrb = 0;
+                    async.forEachOf(current1.index_verb,(value, key, callbackFor4) => {
+                        sum_pos = sum_pos + phrase_pol[value].pol.pos;
+                        sum_neg = sum_neg + phrase_pol[value].pol.neg;
+                        sum_neu = sum_neu + phrase_pol[value].pol.neutre;
+                        nbr_vrb = nbr_vrb + 1;
+                        callbackFor4();
+                    }, err => {
+                        if (err) console.error(err.message);
+                        if (nbr_vrb>0){
+                            let pol = {};
+                            pol.pos = +(sum_pos/nbr_vrb).toFixed(2);
+                            pol.neg = +(sum_neg/nbr_vrb).toFixed(2);
+                            pol.neutre = +(sum_neu/nbr_vrb).toFixed(2);
+                            current1.pol = pol;
+                        }
+
+                        phrase_pol[current1.index]=current1;
+                        callbackFor2();
+                    });
                 });
             }
             else{
