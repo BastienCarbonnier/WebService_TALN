@@ -78,7 +78,7 @@ def findVerbeForNouns(phrase,i_nom):
     deja_trouve = False
 
     while i_d <len(phrase):
-        if phrase[i_d]["nature"]=="VERB":
+        if phrase[i_d]["nature"]=="VERB" and not ((phrase[i_d]["lemme"] != "<unknown>" and ((phrase[i_d]["lemme"]=="être") or (phrase[i_d]["lemme"]=="avoir"))) or phrase[i_d]["mot"] in listAux):
             index_verbe.append(i_d)
             deja_trouve = True
             i_d+=1
