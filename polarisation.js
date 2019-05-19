@@ -257,7 +257,7 @@ function propagerPolariteVecteur(tokens,listIntens,callback){
                 }, err => {
                     if (err) console.error(err.message);
                     if (nbr_adj>0){
-                        let pol = {}
+                        let pol = {};
                         pol.pos = +(sum_pos/nbr_adj).toFixed(2);
                         pol.neg = +(sum_neg/nbr_adj).toFixed(2);
                         pol.neutre = +(sum_neu/nbr_adj).toFixed(2);
