@@ -8,8 +8,6 @@ from spellchecker import SpellChecker
 
 spell = SpellChecker(language="fr")
 
-
-
 tagger = treetaggerwrapper.TreeTagger(TAGLANG='fr',TAGOPT="-token -lemma -sgml -quiet")
 
 tags = {
@@ -85,8 +83,10 @@ def spellCorrectSentence(sent) :
             words_corrected.append(word)
     return " ".join(words_corrected)
 
-# Tests :
-# "La grande chambre vraiment noire était sale et la petite chambre était très très moche"
 print(json.dumps(posTaggingTreeTagger(spellCorrectSentence(sys.argv[1]))))
 
+
+
+# Tests :
+# "La grande chambre vraiment noire était sale et la petite chambre était très très moche"
 #print(json.dumps([{ "index": 0, "mot": 'La', "nature": 'DET' },{ "index": 1, "mot": 'salle', "nature": 'NOUN' },{ "index": 2, "mot": 'de', "nature": 'ADP' },{ "index": 3, "mot": 'bain', "nature": 'NOUN' },{ "index": 4, "mot": 'était', "nature": 'AUX' },{ "index": 5, "mot": 'vraiment', "nature": 'ADV' },{ "index": 6, "mot": 'très', "nature": 'ADV' },{ "index": 7, "mot": 'sale', "nature": 'ADJ'}]))

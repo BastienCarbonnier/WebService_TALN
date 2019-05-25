@@ -36,8 +36,10 @@ function getVecteurPolaritePhrase(phrase,callback){
         if (err) console.error(err.message);
 
 
-
+        console.log("########## Phrase polarisé avant propagation #########");
+        console.log(phrase_pol);
         creationIntensifieurStructure((intensifieurs)=>{
+
             propagerPolariteVecteur(phrase_pol,intensifieurs, (phrase_propa) =>{
                 callback(phrase_propa);
             });
@@ -117,10 +119,13 @@ function propagerPolariteVecteur(tokens,listIntens,callback){
                     deja_inverse = true;
                 }
                 else{
-                    sum_pos = sum_pos + phrase_pol[value].pol.pos;
-                    sum_neg = sum_neg + phrase_pol[value].pol.neg;
-                    sum_neu = sum_neu + phrase_pol[value].pol.neutre;
-                    nbr_adv = nbr_adv + 1;
+                    if (phrase_pol[value] != undefined){
+                        sum_pos = sum_pos + phrase_pol[value].pol.pos;
+                        sum_neg = sum_neg + phrase_pol[value].pol.neg;
+                        sum_neu = sum_neu + phrase_pol[value].pol.neutre;
+                        nbr_adv = nbr_adv + 1;
+                    }
+
                 }
                 callbackFor1();
             }, err => {
@@ -203,7 +208,7 @@ function propagerPolariteVecteur(tokens,listIntens,callback){
 
                 if (intens_sum != 0){
                     if (intens_sum > 0){
-                        if (current.pol.pos > current.pol.neg){
+                        if (current.pol.pos >= current.pol.neg){
                             current.pol.pos = current.pol.pos * intens_sum;
                         }
                         else{
@@ -212,7 +217,7 @@ function propagerPolariteVecteur(tokens,listIntens,callback){
                     }
                     else{
                         intens_sum = intens_sum * -1;
-                        if (current.pol.pos > current.pol.neg){
+                        if (current.pol.pos >= current.pol.neg){
                             current.pol.pos = current.pol.pos * intens_sum;
                         }
                         else{
