@@ -21,10 +21,10 @@ app.post('/', (req, res) => {
 	console.log(req.body.phrase);
 	try{
 		parseur.parserPhrase(req.body.phrase,mc_tree, (tab_phrase)=>{
-			console.log(tab_phrase+" après parser");
 			polarisation.getVecteurPolaritePhrase(tab_phrase, (tab_phrase_polarise)=>{
-				console.log("test "+tab_phrase_polarise);
 				 res.setHeader("Content-type", "application/json");
+				 console.log("___________________________________________________________________________________")
+				 console.log(tab_phrase_polarise)
 				res.end(JSON.stringify(tab_phrase_polarise));
 			});
 		});
