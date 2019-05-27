@@ -2,3 +2,5 @@
 /python/env
 /node_modules
 package-lock.json
+ressources/caches/cache_polarisation/cache.csv
+ressources/caches/cache_pos_tag/cache.csv

@@ -12,7 +12,6 @@ var express      = require('express'),
 
 const app = express();
 app.use(cors());
-//app.use(bodyParser.urlencoded({extended : true}));
 app.use(bodyParser.json());
 const port = 3000;
 
@@ -23,8 +22,6 @@ app.post('/', (req, res) => {
 		parseur.parserPhrase(req.body.phrase,mc_tree, (tab_phrase)=>{
 			polarisation.getVecteurPolaritePhrase(tab_phrase, (tab_phrase_polarise)=>{
 				 res.setHeader("Content-type", "application/json");
-				 console.log("___________________________________________________________________________________")
-				 console.log(tab_phrase_polarise)
 				res.end(JSON.stringify(tab_phrase_polarise));
 			});
 		});
@@ -44,42 +41,3 @@ tools.initialisation((tree)=>{
         console.log(`server is listening on ${port}`);
     });
 });
-
-
-/*
-Polarité vecteur de trois valeur
-
-gestion petit en dur
-
-20 % neg 20% neutre 60% positif
-propagé un vecteur
-
-le bateau à voile
-
-le bateau = tête
-
-tête prend un poids plus important que le reste et on propage
-
-corenlp
-treetager
-
-google nlp
-
-Mots composé
-structure arbre préfixe sérialisé
-
-lemmatiser que le verbe
-
-
-Structure sous forme d'arbre
-tête de la phrase groupe verbale
-
-groupe nominal
-
-
-A faire :
-
-Mots composé : supprimer mots (majuscule)
-Regarder analyseur
-
-*/

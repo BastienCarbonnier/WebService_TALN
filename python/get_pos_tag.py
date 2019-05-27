@@ -3,6 +3,7 @@ import sys
 import json
 import treetaggerwrapper
 import warnings
+import re
 
 from spellchecker import SpellChecker
 
@@ -74,10 +75,13 @@ def posTaggingTreeTagger(text) :
     return tagToObj(taggedText)
 
 def spellCorrectSentence(sent) :
-    words = sent.split(" ");
+    sent = sent.replace(","," , ")
+    sent = sent.replace("."," . ")
+    sent = re.sub("  +", ' ', sent)
+    words = sent.split(" ")
     words_corrected = []
     for word in words :
-        if len(word.split("'")) < 2:
+        if len(word.split("'")) < 2 and word != '':
             words_corrected.append(spell.correction(word))
         else :
             words_corrected.append(word)

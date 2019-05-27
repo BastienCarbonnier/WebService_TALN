@@ -24,7 +24,7 @@ def findAdjectifForNouns(phrase,i_nom):
             i_d+=1
         elif phrase[i_d]["mot"]=="que":
             i_d+=1
-        elif phrase[i_d]["nature"]=="PRON":
+        elif phrase[i_d]["nature"]=="PRON" or phrase[i_d]["nature"]=="ADP":
             i_d+=1
         elif phrase[i_d]["nature"]=="KON":
             i_d+=1

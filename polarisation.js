@@ -18,7 +18,7 @@ function getVecteurPolaritePhrase(phrase,callback){
         mot_pol = value;
 
 
-        if (mot_pol.nature!="ADP" && mot_pol.nature!="DET"){
+        if (mot_pol.nature!="ADP" && mot_pol.nature!="DET" && mot_pol.nature!="PUNCT"){
             getVecteurPolariteMot(value.mot,value.lemme,function(pol){
                 mot_pol.pol = pol;
                 phrase_pol[value.index]=mot_pol;
