@@ -1,6 +1,6 @@
 /*jslint node: true */
 /*jshint esversion: 6 */
-/* jshint expr: true */
+/*jshint expr: true */
 
 var async       = require("async"),
     rp          = require('request-promise'),
@@ -29,13 +29,11 @@ function creationArbrePrefixe(mc_tab,callback){
 
     let mc_tree = new Tree("");
 
-    mc_tab = mc_tab.slice(0,7);
+    mc_tab = mc_tab.slice(0,7); // A enlever pour une mise en production
 
     // Boucle sur chaque mot composés
     async.forEachOf(mc_tab, (value, key, callbackFor) => {
-
         let mot = value.split(";")[1];
-        console.log(mot);
         mc_tree.addWord(mot, (err) => {
             if(err) console.log(err);
             callbackFor();

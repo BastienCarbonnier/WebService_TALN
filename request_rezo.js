@@ -1,6 +1,6 @@
 /*jslint node: true */
 /*jshint esversion: 6 */
-/* jshint expr: true */
+/*jshint expr: true */
 
 var async   = require("async"),
 rp          = require('request-promise'),
@@ -27,9 +27,6 @@ Récupérer si le mot appartient à l'ontologie
 */
 
 function getPosTagFromJDM(mot,callback){
-    console.log("######### Dans get pos tag #######");
-    console.log("Mot");
-    console.log(mot);
 
     let jdm_spacy = {
         "Nom" : "NOUN",
@@ -49,10 +46,7 @@ function getPosTagFromJDM(mot,callback){
         else {
             callback("X");
         }
-
-
     });
-
 }
 function getWordByID (data,w_id,callback){
     var regex = new RegExp("e;"+w_id+";'.*';\\d*;\\d*","g");
@@ -80,7 +74,6 @@ function getRelationsSortantes(fw,rel_id,callback){
 
             var regex_rs = new RegExp("r;\\d*;\\d*;\\d*;\\d*;(-|)\\d*","g");
             var rs = result.match(regex_rs);
-            //console.log(rs);
             var res_tab = [];
             if (rs != null){
                 for (var i in rs){
@@ -104,7 +97,6 @@ function getRelationsSortantes(fw,rel_id,callback){
 }
 function makeGetRequestRezoDump (word,rel_id,param,callback){
     var url = windows1252.encode("http://www.jeuxdemots.org/rezo-dump.php?gotermsubmit=Chercher&gotermrel="+word+"&rel="+rel_id+(param==null?"":param));
-    console.log(url);
     const options = {
         uri: url,
         encoding: 'binary',

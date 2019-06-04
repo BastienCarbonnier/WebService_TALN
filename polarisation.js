@@ -1,6 +1,6 @@
 /*jslint node: true */
 /*jshint esversion: 6 */
-/* jshint expr: true */
+/*jshint expr: true */
 
 var async       = require("async"),
     rp          = require('request-promise'),
@@ -35,11 +35,7 @@ function getVecteurPolaritePhrase(phrase,callback){
     }, err => {
         if (err) console.error(err.message);
 
-
-        console.log("########## Phrase polarisé avant propagation #########");
-        console.log(phrase_pol);
         creationIntensifieurStructure((intensifieurs)=>{
-
             propagerPolariteVecteur(phrase_pol,intensifieurs, (phrase_propa) =>{
                 callback(phrase_propa);
             });
@@ -85,8 +81,7 @@ function creationIntensifieurStructure(callback){
         );
     });
 }
-// Lexique a part et coefficient d'intensification
-// gérer négation : ne et pas inversion
+
 function propagerPolariteVecteur(tokens,listIntens,callback){
     let listAux = ["etes", "ete", "etais", "etait", "etions","etiez", "etaient"];
 
@@ -106,6 +101,7 @@ function propagerPolariteVecteur(tokens,listIntens,callback){
             let nbr_adv = 0;
             let intens_sum = 0;
             let deja_inverse = false;
+
             // Application des adverbe sur le verbe (je recommande guère cet hôtel)
             async.forEachOf(current.index_adv,(value, key, callbackFor1) => {
                 let intens = listIntens[tokens[value].mot];
@@ -125,7 +121,6 @@ function propagerPolariteVecteur(tokens,listIntens,callback){
                         sum_neu = sum_neu + phrase_pol[value].pol.neutre;
                         nbr_adv = nbr_adv + 1;
                     }
-
                 }
                 callbackFor1();
             }, err => {

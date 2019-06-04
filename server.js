@@ -1,6 +1,6 @@
 /*jslint node: true */
 /*jshint esversion: 6 */
-/* jshint expr: true */
+/*jshint expr: true */
 
 var express      = require('express'),
     async        = require("async"),
@@ -17,7 +17,6 @@ const port = 3000;
 
 let mc_tree;
 app.post('/', (req, res) => {
-	console.log(req.body.phrase);
 	try{
 		parseur.parserPhrase(req.body.phrase,mc_tree, (tab_phrase)=>{
 			polarisation.getVecteurPolaritePhrase(tab_phrase, (tab_phrase_polarise)=>{

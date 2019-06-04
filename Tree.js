@@ -20,73 +20,8 @@ function Tree(text) {
     this._root = node;
 }
 
-Tree.prototype.traverseDF = function(callback) {
-
-    // this is a recurse and immediately-invoking function
-    (function recurse(currentNode) {
-        // step 2
-        for (var i = 0, length = currentNode.children.length; i < length; i++) {
-            // step 3
-            recurse(currentNode.children[i]);
-        }
-
-        // step 4
-        callback(currentNode);
-
-        // step 1
-    })(this._root);
-
-};
-
-function Queue() {
-  this.text = [];
-}
-
-Queue.prototype.enqueue = function(record) {
-    this.text.unshift(record);
-};
-Queue.prototype.dequeue = function() {
-    let last = this.text[this.text.length - 1];
-    this.text.pop();
-    return last;
-
-};
-Tree.prototype.traverseBF = function(callback) {
-    var queue = new Queue();
-
-    queue.enqueue(this._root);
-
-    currentTree = queue.dequeue();
-    while(currentTree){
-        for (var i = 0, length = currentTree.children.length; i < length; i++) {
-            queue.enqueue(currentTree.children[i]);
-        }
-
-        callback(currentTree);
-        currentTree = queue.dequeue();
-    }
-};
 Tree.prototype.contains = function(callback, traversal) {
     traversal.call(this, callback);
-};
-
-Tree.prototype.add = function(text, totext, traversal) {
-    var child = new Node(text),
-        parent = null,
-        callback = function(node) {
-            if (node.text === totext) {
-                parent = node;
-            }
-        };
-
-    this.contains(callback, traversal);
-
-    if (parent) {
-        parent.children.push(child);
-        child.parent = parent;
-    } else {
-        throw new Error('Cannot add node to a non-existent parent.');
-    }
 };
 
 Tree.prototype.addWord = function(compound_word,callback) {
@@ -166,12 +101,10 @@ Tree.prototype.containsCompoundWord = function(words,callback) {
                 function () { return  !find && i < nbr_children ; },//check condition.
                 function (callback2) {
                     if(childrens[i].text == currentWord){
-                        console.log("Fils trouvé : " + childrens[i].text+" "+currentWord);
                         find = true;
                         callback2(null,true);
                     }
                     else{
-                        console.log("Fils non trouvé : " + childrens[i].text+" "+currentWord);
                         i++;
                         find=false;
                         callback2(null,false);
@@ -220,12 +153,6 @@ Tree.prototype.containsCompoundWord = function(words,callback) {
 
                             }
                             else{
-                                //console.log("Je ne suis pas une feuille")
-                                //console.log(childrens[i]);
-                                console.log("words : ");
-                                console.log(words);
-                                console.log("words_save : ");
-                                console.log(words_save);
                                 if (words_save == undefined){
                                     words_save = words.slice();
                                 }
@@ -286,42 +213,12 @@ Tree.prototype.containsCompoundWord = function(words,callback) {
         },
         function (err,findWord,max_cw) { //final result
             if(findWord){
-                console.log("On a trouvé au moins 1 mot composé");
                 callback(err,findWord,max_cw);
             }else{
-                console.log("Aucun mot composé n'a été trouvé");
                 callback(err,findWord,max_cw);
             }
         }
     );
-};
-Tree.prototype.remove = function(text, fromtext, traversal) {
-    var tree = this,
-        parent = null,
-        childToRemove = null,
-        index;
-
-    var callback = function(node) {
-        if (node.text === fromtext) {
-            parent = node;
-        }
-    };
-
-    this.contains(callback, traversal);
-
-    if (parent) {
-        index = findIndex(parent.children, text);
-
-        if (index === undefined) {
-            throw new Error('Node to remove does not exist.');
-        } else {
-            childToRemove = parent.children.splice(index, 1);
-        }
-    } else {
-        throw new Error('Parent does not exist.');
-    }
-
-    return childToRemove;
 };
 
 module.exports = Node;

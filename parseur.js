@@ -22,25 +22,17 @@ function parserPhrase(phrase,mc_tree,callback){
     // On récupère les pos_tag de chaque mots
     PythonShell.run('get_pos_tag.py', options, function (err, results) {
         if (err) throw err;
-        console.log(results[0]);
-        //let tab_phrase = JSON.parse(JSON.stringify(results[0]));
+
         let tab_phrase = JSON.parse(results[0]);
-        console.log(tab_phrase);
 
         // On vérifie si la phrase contient des mots composés
         mc_tree.containsCompoundWord(tab_phrase, (err,exist,max_cw)=>{
-            console.log(max_cw);
-            // On join les mots composés et on adapte les indexs en conséquence
+            // On join les mots composés et on adapte les indexes en conséquence
             joinCompoundWords (tab_phrase,max_cw,(tab_phrase_cw)=>{
                 postagCompoundWords (tab_phrase_cw,(tab_phrase_cw_tag)=>{
-
-                    // ajouter gestion regex : find CompoundWordWithRegex
-                    // Créer un fichier de regex
                     async.forEachOf(tab_phrase_cw_tag, (value, key, callbackFor1) => {
                         cache_pos_tag.getFromCache(value.mot, (find,data)=>{
                             if (find){
-                                console.log("####### Data cache");
-                                console.log(data);
                                 tab_phrase_cw_tag[value.index].nature = data.nature;
                                 callbackFor1();
                             }
@@ -56,8 +48,7 @@ function parserPhrase(phrase,mc_tree,callback){
                         PythonShell.run('propage_pos_tag.py', options, function (err, results) {
                             if (err) throw err;
                             let phrase_pos_prop = JSON.parse(results[0]);
-                            console.log("###### ########Après avoir propagé les pos_tag : ");
-                            console.log(phrase_pos_prop);
+
                             callback(phrase_pos_prop);
 
                         });
@@ -82,10 +73,6 @@ function joinCompoundWords (phrase,cw_index,callback){
         }
         else{
             let words_joined = phrase[index_cw-decalage];
-            console.log("index_cw, decalage : ");
-            console.log(index_cw);
-            console.log(decalage);
-            console.log(phrase);
             // On récupère les mots à lier entre eux
             let word_to_join = phrase.slice(index_cw+1-decalage,index_cw+size_cw-decalage);
 
@@ -112,39 +99,10 @@ function joinCompoundWords (phrase,cw_index,callback){
         }
     }, err => {
         if (err) console.error(err.message);
-        console.log(phrase);
         callback(phrase);
     });
-
-    /*
-    Gérer les relative : que qui
-    subordonné avec que
-
-    la nourriture de cet hôtel que j'aime bien est déguelasse
-
-    groupe nominaux prépositionnel
-
-    négation en priorité également (mettre un paramètre pour inverser)
-
-    voir ce qui est urgent dans les avis
-
-
-    suivi taln mettre les heuristiques
-    définir une mesure sur 100 avis par exemple
-
-    pattern devoir : devoir faire un effort
-
-    la qualité de la nourriture est remarquable
-
-    qualité du services
-
-
-    satisfait appareil
-
-
-    injecteur des regex (avant mot composé)
-     */
 }
+
 function postagCompoundWords(phrase,callback) {
     async.forEachOf(phrase, (value, key, callbackFor) => {
         if (value.nature=="TOFIND"){
