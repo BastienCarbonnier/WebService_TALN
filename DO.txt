@@ -1,2 +1,0 @@
-Ajout d'un correcteur orthographique
-Si polarisation du mot non existante on check la polarisation du lem si non existante on met une polarisation par défaut
