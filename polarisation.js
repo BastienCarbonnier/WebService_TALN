@@ -90,7 +90,7 @@ function creationIntensifieurStructure(callback){
 function propagerPolariteVecteur(tokens,listIntens,callback){
     let listAux = ["etes", "ete", "etais", "etait", "etions","etiez", "etaient"];
 
-    let phrase_pol = [];
+    let phrase_pol = tokens;
 
 
     async.forEachOf(tokens, (value, key, callbackFor) => {
